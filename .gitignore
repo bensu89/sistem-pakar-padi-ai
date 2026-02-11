@@ -1,0 +1,29 @@
+/node_modules
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
+.env
+.env.backup
+.phpunit.result.cache
+docker-compose.override.yml
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+/.idea
+/.vscode
+# --- TAMBAHAN KHUSUS PYTHON (AI) ---
+# Folder Virtual Environment
+venv/
+env/
+.env/
+
+# Cache Python (Sampah)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Model AI (Opsional: Jika file .h5 > 100MB, jangan diupload lewat sini)
+# Tapi kalau model MobileNetV2 biasanya kecil (10-20MB), jadi AMAN.
+# *.h5
