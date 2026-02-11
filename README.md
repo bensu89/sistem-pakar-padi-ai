@@ -1,30 +1,82 @@
-Nama Project: Aplikasi Deteksi Penyakit Padi (Padi Web)
-Overview: Project ini adalah sebuah aplikasi web berbasis Laravel yang dirancang untuk membantu mendeteksi penyakit pada tanaman padi. Aplikasi ini memiliki fitur utama untuk menganalisa kondisi tanaman (diagnosis) dan dashboard monitoring untuk admin atau peneliti.
-Fitur Utama:
-Diagnosis Penyakit (User):
-Halaman Utama (/): Antarmuka bagi pengguna untuk memulai proses deteksi (scan/upload gambar).
-Proses Analisa (/analyze): Mengirimkan data gambar padi untuk dianalisa (kemungkinan terintegrasi dengan layanan AI/ML eksternal atau internal).
-Hasil Diagnosis: Menampilkan hasil deteksi penyakit kepada pengguna.
-Dashboard Admin & Monitoring (/monitoring-penelitian):
-Halaman khusus admin untuk memantau data penelitian atau riwayat diagnosis yang masuk.
-Fitur untuk melihat detail laporan.
-Manajemen Data Laporan:
-Hapus Data (DELETE /monitoring-penelitian/{id}): Menghapus data laporan yang valid.
-Hapus Sampah (DELETE /hapus-sampah/{id}): Menghapus data yang dianggap tidak valid atau salah upload.
-Export Laporan (/export-laporan): Mengunduh data laporan dalam format file (Excel/CSV).
-Teknologi (Tech Stack):
-Backend Framework: Laravel 8.x (PHP ^7.3|^8.0)
-Frontend: Blade Templates (View engine bawaan Laravel)
-Database: MySQL (Menggunakan Eloquent ORM)
-HTTP Client: Guzzle (kemungkinan digunakan untuk komunikasi dengan service ML/Python)
-Autentikasi: Laravel Sanctum (untuk API token management)
-Struktur Kode Penting:
-Controllers (app/Http/Controllers):
-DiagnosisController.php: Mengatur logika diagnosis dan interaksi user di halaman depan.
-AdminController.php: Mengelola dashboard admin, monitoring data, dan export laporan.
-Views (resources/views):
-home.blade.php: Tampilan halaman utama.
-admin.blade.php & admin/: Tampilan dashboard admin.
-result.blade.php: Tampilan hasil diagnosis.
-Routes (routes/web.php): Mendefinisikan alur aplikasi mulai dari halaman depan, proses analisa, hingga fitur administratif.
-Catatan: Terlihat ada beberapa file duplikat atau salah penempatan seperti admin.blade.php di dalam folder Controllers yang sebaiknya dibersihkan.
+# Rice Disease Detection (Padi Web) 🌾
+
+A Laravel-based web application designed to detect diseases in rice plants through image analysis. This project helps farmers and researchers to quickly diagnose plant health issues and monitor disease spread.
+
+## 🚀 Features
+
+- **Disease Diagnosis**: Upload or capture images of rice plants for instant disease analysis.
+- **AI Integration**: Communicates with an AI/ML service for image processing and prediction.
+- **Admin Dashboard**: Comprehensive monitoring dashboard at `/monitoring-penelitian` for administrators to view recent scans and reports.
+- **Report Management**:
+  - View detailed diagnosis history.
+  - Delete valid or invalid (junk) reports.
+  - Export reports to Excel/CSV for offline analysis.
+- **Secure Authentication**: Built-in authentication for administrative access.
+
+## 🛠️ Tech Stack
+
+- **Backend framework**: Laravel 8.x
+- **Language**: PHP ^7.3|^8.0
+- **Database**: MySQL (Eloquent ORM)
+- **Frontend**: Blade Templates, Bootstrap (Standard Laravel UI)
+- **HTTP Client**: Guzzle (for external API communication)
+- **API Authentication**: Laravel Sanctum
+
+## ⚙️ Installation
+
+Follow these steps to set up the project locally:
+
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/yourusername/padi-web.git
+    cd padi-web
+    ```
+
+2.  **Install PHP dependencies**
+    ```bash
+    composer install
+    ```
+
+3.  **Environment Configuration**
+    Copy the example environment file and configure your database settings:
+    ```bash
+    cp .env.example .env
+    ```
+    Update the `.env` file with your database credentials:
+    ```env
+    DB_DATABASE=padi_db
+    DB_USERNAME=root
+    DB_PASSWORD=
+    ```
+
+4.  **Generate Application Key**
+    ```bash
+    php artisan key:generate
+    ```
+
+5.  **Run Migrations**
+    Set up the database tables:
+    ```bash
+    php artisan migrate
+    ```
+
+6.  **Serve the Application**
+    Start the local development server:
+    ```bash
+    php artisan serve
+    ```
+    The application will be accessible at `http://localhost:8000`.
+
+## 📂 Key Routes
+
+- **Home (Diagnosis)**: `/`
+- **Admin Dashboard**: `/monitoring-penelitian`
+- **Export Report**: `/export-laporan`
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
