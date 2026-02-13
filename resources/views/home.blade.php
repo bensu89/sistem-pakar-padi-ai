@@ -444,7 +444,11 @@
 
             } catch (error) {
                 console.error(error);
-                const msg = error.response?.data?.error || "Gagal koneksi ke AI. Coba lagi.";
+                console.error(error);
+                let msg = "Gagal koneksi ke AI. Coba lagi.";
+                if (error.response && error.response.data) {
+                    msg = error.response.data.error || error.response.data.message || msg;
+                }
                 alert(msg);
             } finally {
                 btn.innerHTML = originalText;
@@ -501,7 +505,11 @@
 
             } catch (error) {
                 console.error(error);
-                const msg = error.response?.data?.error || "Koneksi AI gagal. Coba lagi.";
+                console.error(error);
+                let msg = "Koneksi AI gagal. Coba lagi.";
+                if (error.response && error.response.data) {
+                    msg = error.response.data.error || error.response.data.message || msg;
+                }
                 addBotMessage("⚠️ " + escapeHtml(msg));
             } finally {
                 document.getElementById('chatLoading').classList.add('hidden');
