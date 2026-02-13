@@ -131,11 +131,8 @@
                     </div>
                 </div>
 
-                <div class="text-xs text-gray-400 text-center mt-4">
-             <p style="font-size: 14px; font-weight: bold; text-align: center;">
-                Kerjasama Antara Tim KKN dan <br>
-                Pemerintahan Desa Cikurubuk
-                </p>
+               <div class="text-xs text-gray-400 text-center mt-4">
+                    <p>Aplikasi ini Dikembangkan TIm KKN Desa Cikurubuk</p>
                 </div>
             </div>
         </div>
