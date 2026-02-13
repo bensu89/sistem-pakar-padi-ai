@@ -132,7 +132,9 @@
                 </div>
 
                 <div class="text-xs text-gray-400 text-center mt-4">
-                    <p>Gunakan fitur chat di samping untuk konsultasi umum tanpa upload foto.</p>
+                    <p>
+                        Kerjasama Antara Tim KKN Serta Pemerintah Desa Cikurubuk
+                    </p>
                 </div>
             </div>
         </div>
@@ -506,7 +508,7 @@
             } catch (error) {
                 console.error(error);
                 let msg = error.message || "Koneksi AI gagal.";
-                
+
                 if (error.response) {
                     // Jika response ada (bukan network error)
                     if (typeof error.response.data === 'string') {
@@ -517,7 +519,7 @@
                         msg = error.response.data.error || error.response.data.message || msg;
                     }
                 }
-                
+
                 addBotMessage("⚠️ " + escapeHtml(msg));
             } finally {
                 document.getElementById('chatLoading').classList.add('hidden');
