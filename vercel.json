@@ -11,19 +11,5 @@
             "src": "/(.*)",
             "dest": "/api/index.php"
         }
-    ],
-    "env": {
-        "APP_ENV": "production",
-        "APP_DEBUG": "true",
-        "APP_URL": "https://${VERCEL_URL}",
-        "APP_KEY": "${APP_KEY}",
-        "DB_CONNECTION": "pgsql",
-        "DB_HOST": "${DB_HOST}",
-        "DB_PORT": "${DB_PORT}",
-        "DB_DATABASE": "${DB_DATABASE}",
-        "DB_USERNAME": "${DB_USERNAME}",
-        "DB_PASSWORD": "${DB_PASSWORD}",
-        "GROQ_API_KEY": "${GROQ_API_KEY}",
-        "GROQ_DEFAULT_MODEL": "${GROQ_DEFAULT_MODEL}"
-    }
+    ]
 }
