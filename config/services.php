@@ -33,6 +33,7 @@ return [
     'groq' => [
         'api_key' => env('GROQ_API_KEY'),
         'default_model' => env('GROQ_DEFAULT_MODEL', 'llama-3.3-70b-versatile'),
+        'vision_model' => env('GROQ_VISION_MODEL', 'meta-llama/llama-4-scout-17b-16e-instruct'),
         'base_url' => 'https://api.groq.com/openai/v1',
     ],
 

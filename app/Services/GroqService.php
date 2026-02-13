@@ -63,8 +63,8 @@ Aturan:
      */
     public function chatWithImage(string $message, string $base64Image, string $mimeType = 'image/jpeg', ?string $model = null): string
     {
-        // Force vision model untuk gambar (Llama 4 Scout supports vision)
-        $model = 'meta-llama/llama-4-scout-17b-16e-instruct';
+        // Use configured vision model (default: llama-4-scout)
+        $model = $model ?? config('services.groq.vision_model', 'meta-llama/llama-4-scout-17b-16e-instruct');
 
         $messages = [
             ['role' => 'system', 'content' => $this->systemPrompt],
@@ -123,7 +123,7 @@ Aturan:
      */
     public function diagnosisImage(string $base64Image, string $mimeType = 'image/jpeg'): array
     {
-        $model = 'meta-llama/llama-4-scout-17b-16e-instruct';
+        $model = config('services.groq.vision_model', 'meta-llama/llama-4-scout-17b-16e-instruct');
 
         $messages = [
             ['role' => 'system', 'content' => $this->diagnosisPrompt],
