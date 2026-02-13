@@ -132,7 +132,7 @@
                 </div>
 
                 <div class="text-xs text-gray-400 text-center mt-4">
-             <p style="font-size: 24px; font-weight: bold; text-align: center;">
+             <p style="font-size: 16px; font-weight: bold; text-align: center;">
     Kerjasama Antara Tim KKN dan <br>
     Pemerintahan Desa Cikurubuk
 </p>
