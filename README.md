@@ -2,211 +2,132 @@
   <img src="https://img.shields.io/badge/Laravel-8.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel">
   <img src="https://img.shields.io/badge/Groq_AI-Cloud_API-F55036?style=for-the-badge&logo=groq&logoColor=white" alt="Groq">
   <img src="https://img.shields.io/badge/Tailwind_CSS-3.x-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind">
-  <img src="https://img.shields.io/badge/PHP-8.0-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP">
+  <img src="https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel">
+  <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase">
 </p>
 
 # 🌾 Pohaci AI — Ngariksa Pare, Ngajaga Lemah Cai
 
-**Pohaci AI** adalah aplikasi web berbasis Laravel untuk **deteksi penyakit tanaman padi** menggunakan kecerdasan buatan (AI). Aplikasi ini memanfaatkan **Groq Cloud API** dengan model **Llama 4 Scout Vision** untuk menganalisa gambar daun padi secara real-time, serta menyediakan chatbot AI untuk konsultasi pertanian.
+**Pohaci AI** adalah aplikasi sistem pakar berbasis web untuk **deteksi penyakit tanaman padi** dan **konsultasi pertanian**. Aplikasi ini mengintegrasikan **Laravel** sebagai backend dengan **Groq Cloud API** untuk kecerdasan buatan yang cepat dan akurat.
 
 > *"Pohaci"* diambil dari Dewi Sri (Nyi Pohaci) dalam mitologi Sunda — dewi padi dan kesuburan.
 
 ---
 
-## ✨ Fitur Utama
+## ✨ Fitur Unggulan
 
-### 🔬 Diagnosa Penyakit Padi
-- Upload foto daun padi → AI menganalisa dan mendeteksi penyakit
-- Menampilkan **nama penyakit**, **confidence level (%)**, dan **solusi penanganan**
-- Otomatis menggunakan model **Llama 4 Scout Vision** untuk analisa gambar
-- Data diagnosa tersimpan di database untuk monitoring
+### 🔬 Diagnosa Penyakit (Vision AI)
+- **Upload Foto Daun**: Analisa otomatis menggunakan model Vision AI (Llama 3.2 Vision / Llama 4 Scout).
+- **Hasil Instan**: Menampilkan nama penyakit, tingkat kepercayaan (confidence), dan solusi penanganan.
+- **Riwayat Diagnosa**: Data tersimpan untuk monitoring dan pelaporan.
 
-### 💬 Chatbot AI Interaktif
-- Konsultasi pertanian padi secara real-time dengan AI
-- **📎 Attach File** — Kirim gambar langsung di chat untuk analisa
-- **🔗 Add URL** — Paste link halaman web untuk dianalisa AI
-- Model AI otomatis dipilih sesuai konteks (text vs vision)
+### 💬 Chatbot AI Pertanian (Smart Assistant)
+- **Konsultasi Real-time**: Tanya jawab seputar pertanian padi.
+- **Multi-Modal**:
+  - **Text**: Pertanyaan umum.
+  - **Gambar (📎 Attach)**: Analisa foto hama/penyakit langsung di chat.
+  - **URL (🔗 Link)**: Analisa konten artikel/berita pertanian dari link eksternal.
+- **Dynamic Model**: Otomatis memilih model bahasa yang tepat (Llama 3.3 70B untuk chat kompleks, Mixtral untuk kecepatan).
 
-### 📊 Dashboard Monitoring (Admin)
-- Statistik diagnosa: total scan, penyakit terdeteksi, akurasi rata-rata
-- Tabel data diagnosa valid dengan pagination
-- Tabel data upload gagal/non-padi
-- Fitur hapus data dan export laporan ke Excel/CSV
-- Dilindungi autentikasi (login required)
+### � Responsive & Mobile-First
+- Tampilan optimal di HP dan Desktop.
+- Desain modern menggunakan **Tailwind CSS**.
+- Mode layar penuh untuk pengalaman aplikasi native.
 
-### 🔐 Autentikasi
-- Login & Register dengan desain modern (Tailwind CSS + Glassmorphism)
-- Proteksi halaman admin dengan middleware `auth`
-- Fitur lupa password & verifikasi email
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Teknologi |
-|-------|-----------|
-| **Backend** | Laravel 8.x, PHP 8.0 |
-| **AI Engine** | Groq Cloud API (Llama 3.3 70B, Llama 4 Scout Vision) |
-| **Frontend** | Blade Templates, Tailwind CSS, Axios |
-| **Database** | MySQL (Eloquent ORM) |
-| **Auth** | Laravel UI |
+### �️ Dashboard Admin
+- Statistik penggunaan AI.
+- Manajemen data diagnosa.
+- Export laporan (Excel/CSV).
 
 ---
 
-## 🧠 Model AI yang Digunakan
+## 🏗️ Arsitektur & Teknologi
 
-| Fungsi | Model | Provider |
-|--------|-------|----------|
-| Chat text & URL analysis | `llama-3.3-70b-versatile` | Meta/Groq |
-| Analisa gambar (Vision) | `meta-llama/llama-4-scout-17b-16e-instruct` | Meta/Groq |
-| Diagnosa penyakit daun | `meta-llama/llama-4-scout-17b-16e-instruct` | Meta/Groq |
-
----
-
-## ⚙️ Instalasi
-
-### Prasyarat
-- PHP >= 8.0
-- Composer
-- MySQL
-- [Groq API Key](https://console.groq.com) (gratis)
-
-### Langkah Instalasi
-
-```bash
-# 1. Clone repository
-git clone https://github.com/bensu89/sistem-pakar-padi-ai.git
-cd sistem-pakar-padi-ai
-
-# 2. Install dependensi PHP
-composer install
-
-# 3. Konfigurasi environment
-cp .env.example .env
-
-# 4. Generate application key
-php artisan key:generate
-
-# 5. Konfigurasi database di .env
-# DB_DATABASE=padi_db
-# DB_USERNAME=root
-# DB_PASSWORD=
-
-# 6. Konfigurasi Groq API di .env
-# GROQ_API_KEY=your_groq_api_key_here
-# GROQ_DEFAULT_MODEL=llama-3.3-70b-versatile
-
-# 7. Jalankan migrasi database
-php artisan migrate
-
-# 8. Buat symbolic link untuk storage
-php artisan storage:link
-
-# 9. Jalankan server
-php artisan serve
-```
-
-Buka `http://localhost:8000` di browser.
+| Komponen | Teknologi | Keterangan |
+|----------|-----------|------------|
+| **Framework** | Laravel 8.x | Backend PHP robust & aman |
+| **Database** | PostgreSQL (Supabase) | Cloud database scalable |
+| **AI Engine** | Groq API | Inference super cepat (Llama 3 series) |
+| **Frontend** | Blade + Tailwind CSS | UI responsif & ringan |
+| **Hosting** | Vercel (Serverless) | Deployment otomatis & performa tinggi |
 
 ---
 
-## 📂 Struktur Aplikasi
+## 🚀 Panduan Instalasi (Lokal)
 
-```
-padi-web/
-├── app/
-│   ├── Http/Controllers/
-│   │   ├── DiagnosisController.php    # Upload & diagnosa padi (Groq Vision)
-│   │   ├── ChatController.php         # Chatbot AI (text, file, URL)
-│   │   └── AdminController.php        # Dashboard monitoring
-│   ├── Models/
-│   │   ├── Diagnosis.php              # Model data diagnosa valid
-│   │   └── FailedUpload.php           # Model data upload gagal
-│   └── Services/
-│       └── GroqService.php            # Service komunikasi Groq API
-├── resources/views/
-│   ├── home.blade.php                 # Halaman utama (scan + chat)
-│   ├── admin/index.blade.php          # Dashboard admin
-│   └── auth/                          # Halaman login, register, dll
-├── routes/
-│   └── web.php                        # Definisi semua route
-└── config/
-    └── services.php                   # Konfigurasi Groq API
-```
+1.  **Clone Repository**
+    ```bash
+    git clone https://github.com/bensu89/sistem-pakar-padi-ai.git
+    cd sistem-pakar-padi-ai
+    ```
 
----
+2.  **Install Dependensi**
+    ```bash
+    composer install
+    npm install && npm run dev
+    ```
 
-## �️ Route Aplikasi
-
-| Method | URI | Fungsi |
-|--------|-----|--------|
-| `GET` | `/` | Halaman utama (diagnosa + chatbot) |
-| `POST` | `/analyze` | Proses upload & diagnosa gambar |
-| `POST` | `/chat` | Kirim pesan chat ke AI |
-| `GET` | `/monitoring-penelitian` | Dashboard admin (auth) |
-| `DELETE` | `/monitoring-penelitian/{id}` | Hapus data diagnosa (auth) |
-| `GET` | `/export-laporan` | Export laporan Excel/CSV (auth) |
-| `GET` | `/login` | Halaman login |
-| `GET` | `/register` | Halaman registrasi |
-
----
-
-## 📸 Alur Kerja
-
-```mermaid
-graph LR
-    A[User Upload Foto] --> B[Laravel DiagnosisController]
-    B --> C[Encode Base64]
-    C --> D[Groq Vision API]
-    D --> E{Hasil Analisa}
-    E -->|Penyakit| F[Simpan ke DB + Tampilkan]
-    E -->|Bukan Padi| G[Simpan ke Failed + Warning]
+3.  **Konfigurasi Environment**
+    Salin `.env.example` ke `.env` dan sesuaikan:
+    ```env
+    APP_URL=http://localhost:8000
     
-    H[User Ketik Chat] --> I[Laravel ChatController]
-    I --> J[Groq Text API]
-    J --> K[Tampilkan Jawaban]
-    
-    L[User Attach File] --> M[ChatController]
-    M --> N[Groq Vision API]
-    N --> K
-    
-    O[User Paste URL] --> P[ChatController]
-    P --> Q[Fetch URL Content]
-    Q --> R[Groq Text API]
-    R --> K
-```
+    # Database (Bisa pakai MySQL lokal atau Supabase)
+    DB_CONNECTION=mysql 
+    DB_HOST=127.0.0.1
+    DB_PORT=3306
+    DB_DATABASE=padi_db
+    DB_USERNAME=root
+    DB_PASSWORD=
+
+    # Groq API (Dapatkan di console.groq.com)
+    GROQ_API_KEY=gsk_...
+    GROQ_DEFAULT_MODEL=llama-3.1-8b-instant
+    GROQ_VISION_MODEL=llama-3.2-11b-vision-preview
+    ```
+
+4.  **Generate Key & Migrasi**
+    ```bash
+    php artisan key:generate
+    php artisan migrate
+    php artisan storage:link
+    ```
+
+5.  **Jalankan Server**
+    ```bash
+    php artisan serve
+    ```
+    Buka `http://localhost:8000`
 
 ---
 
-## 🔒 Keamanan
+## ☁️ Panduan Deployment (Vercel)
 
-- ✅ CSRF Protection pada semua form dan AJAX request
-- ✅ XSS Prevention — escape HTML pada input chat
-- ✅ Mass Assignment Protection — model menggunakan `$fillable`
-- ✅ Admin routes dilindungi middleware `auth`
-- ✅ Groq API key disimpan aman di `.env` (tidak di-commit)
-- ✅ Validasi input pada semua controller
+Aplikasi ini sudah dikonfigurasi untuk **Vercel** serverless environment.
 
----
+1.  **Push ke GitHub** pastikan kode terbaru ada di repo.
+2.  **Import di Vercel Dashboard**.
+3.  **Set Environment Variables** di Vercel:
+    - `APP_KEY`: (Sama seperti lokal)
+    - `APP_DEBUG`: `false` (untuk production)
+    - `APP_URL`: `https://namaproject.vercel.app`
+    - `GROQ_API_KEY`: API Key Groq Anda
+    - `DB_CONNECTION`: `pgsql`
+    - `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`: Detail koneksi Supabase Anda.
+    - `GROQ_DEFAULT_MODEL`: `llama-3.1-8b-instant` (Rekomendasi)
+    - `GROQ_VISION_MODEL`: `llama-3.2-11b-vision-preview`
+4.  **Redeploy** jika ada perubahan kode.
 
-## 🤝 Kontribusi
-
-Kontribusi sangat diterima! Silakan fork, buat branch, dan submit Pull Request.
-
-```bash
-git checkout -b fitur-baru
-git commit -m "Tambah fitur baru"
-git push origin fitur-baru
-```
+> **Catatan:** Untuk Vercel, pastikan menggunakan `vercel-php@0.9.0` (sudah diatur di `vercel.json`).
 
 ---
 
-## 📝 Lisensi
+## 🤝 Kontribusi & Credits
 
-Project ini dilisensikan di bawah [MIT License](https://opensource.org/licenses/MIT).
+Aplikasi ini dikembangkan oleh **Tim KKN Desa Cikurubuk** sebagai dedikasi untuk memajukan teknologi pertanian digital di Indonesia.
 
 ---
 
 <p align="center">
-  Dibuat dengan ❤️ untuk pertanian Indonesia 🇮🇩
+  Dibuat dengan ❤️ untuk Pertanian Indonesia 🇮🇩
 </p>
