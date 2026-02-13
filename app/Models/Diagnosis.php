@@ -8,7 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class Diagnosis extends Model
 {
     use HasFactory;
-    
-    // Izinkan semua kolom diisi
-    protected $guarded = [];
+
+    // Kolom yang diizinkan untuk mass assignment
+    protected $fillable = [
+        'image_path',
+        'disease_name',
+        'confidence',
+        'solution',
+    ];
 }

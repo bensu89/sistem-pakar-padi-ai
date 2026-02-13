@@ -8,5 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class FailedUpload extends Model
 {
     use HasFactory;
-    protected $guarded = []; // Agar bisa diisi massal
+    // Kolom yang diizinkan untuk mass assignment
+    protected $fillable = [
+        'image_path',
+        'reason',
+    ];
 }

@@ -8,14 +8,20 @@ use App\Models\FailedUpload;   // Model Data Sampah
 
 class AdminController extends Controller
 {
+    // Lindungi semua method dengan auth middleware
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     // 1. HALAMAN UTAMA DASHBOARD
     public function index()
     {
-        // Data Valid (Padi) - Urutkan dari terbaru
-        $data = Diagnosis::latest()->get();
+        // Data Valid (Padi) - Urutkan dari terbaru, dengan pagination
+        $data = Diagnosis::latest()->paginate(15);
 
-        // Data Sampah (Salah Upload) - Urutkan dari terbaru
-        $sampah = FailedUpload::latest()->get();
+        // Data Sampah (Salah Upload) - Urutkan dari terbaru, dengan pagination
+        $sampah = FailedUpload::latest()->paginate(10);
 
         return view('admin.index', compact('data', 'sampah'));
     }
@@ -24,9 +30,9 @@ class AdminController extends Controller
     public function destroy($id)
     {
         $item = Diagnosis::find($id);
-        if($item) {
+        if ($item) {
             // Hapus file fisik gambar agar hemat penyimpanan
-            if(file_exists(public_path($item->image_path))){
+            if (file_exists(public_path($item->image_path))) {
                 unlink(public_path($item->image_path));
             }
             $item->delete();
@@ -41,16 +47,16 @@ class AdminController extends Controller
         $data = Diagnosis::latest()->get();
 
         $headers = array(
-            "Content-type"        => "text/csv",
+            "Content-type" => "text/csv",
             "Content-Disposition" => "attachment; filename=$fileName",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
         );
 
-        $callback = function() use($data) {
+        $callback = function () use ($data) {
             $file = fopen('php://output', 'w');
-            
+
             // Header Kolom Excel
             fputcsv($file, array('No', 'Tanggal Scan', 'Nama Penyakit', 'Akurasi (%)', 'Solusi AI', 'Lokasi Gambar'));
 
@@ -75,18 +81,18 @@ class AdminController extends Controller
     public function destroyFailed($id)
     {
         $item = FailedUpload::find($id);
-        
-        if($item) {
+
+        if ($item) {
             // Hapus file gambarnya juga biar storage lega
             // Cek path, kadang tersimpan relative atau full path
             // Kita coba public_path() standar
-            if(file_exists(public_path($item->image_path))){
+            if (file_exists(public_path($item->image_path))) {
                 unlink(public_path($item->image_path));
             }
-            
+
             $item->delete();
         }
-        
+
         return back()->with('success', 'Data sampah berhasil dihapus permanen.');
     }
 }

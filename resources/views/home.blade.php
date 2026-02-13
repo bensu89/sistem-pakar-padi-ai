@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Sistem Pakar Padi AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -128,12 +130,21 @@
     </div>
 
     <script>
-        // --- KONFIGURASI JALUR ---
+        // --- KONFIGURASI CSRF & JALUR ---
+        axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
         const URL_UPLOAD = "{{ route('analyze') }}"; 
         const URL_CHAT = "http://127.0.0.1:5000/chat"; 
         
         // Default Context: "Konsultasi Umum" jika belum ada foto
         let currentDisease = "Konsultasi Umum"; 
+
+        // Fungsi escape HTML untuk mencegah XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(text));
+            return div.innerHTML;
+        }
 
         function formatText(text) {
             if (!text) return "";
@@ -146,18 +157,15 @@
 
         // --- FUNGSI RESET (KEMBALI KE MODE UMUM) ---
         function resetApp() {
-            // 1. Reset Upload Form
             document.getElementById('uploadForm').reset();
             document.getElementById('imagePreview').src = "";
             document.getElementById('previewContainer').classList.add('hidden');
             document.getElementById('uploadPrompt').classList.remove('hidden');
             document.getElementById('resultSection').classList.add('hidden');
             
-            // 2. Kembalikan Chat ke Mode Umum
             currentDisease = "Konsultasi Umum";
             document.getElementById('chatContextDisease').innerText = currentDisease;
             
-            // 3. Beri Info di Chat (Opsional)
             addBotMessage("🔄 <i>Mode diagnosa di-reset. Kembali ke konsultasi umum.</i>");
         }
 
@@ -194,21 +202,17 @@
             formData.append('file', fileInput.files[0]);
 
             try {
-                // Kirim ke Laravel
                 const response = await axios.post(URL_UPLOAD, formData);
                 const data = response.data;
 
-                // Tampilkan Hasil di Kiri
                 document.getElementById('resultSection').classList.remove('hidden');
                 document.getElementById('resDisease').innerText = data.disease_name;
                 document.getElementById('resConfidenceBar').style.width = data.confidence + "%";
                 document.getElementById('resConfidenceText').innerText = data.confidence + "%";
 
-                // UBAH KONTEKS CHAT JADI PENYAKIT SPESIFIK
                 currentDisease = data.disease_name;
                 document.getElementById('chatContextDisease').innerText = currentDisease;
                 
-                // Masukkan Analisa Awal ke Chat
                 const analisaRapi = formatText(data.solution);
                 addBotMessage(`💡 <b>Hasil Diagnosa (${data.confidence}%):</b><br><br>${analisaRapi}`);
 
@@ -235,7 +239,7 @@
             try {
                 const response = await axios.post(URL_CHAT, {
                     question: question,
-                    disease_context: currentDisease // Bisa 'Konsultasi Umum' atau Nama Penyakit
+                    disease_context: currentDisease
                 });
                 
                 const jawabanRapi = formatText(response.data.answer);
@@ -251,10 +255,11 @@
 
         function addUserMessage(text) {
             const history = document.getElementById('chatHistory');
+            const safeText = escapeHtml(text);
             const html = `
                 <div class="flex gap-3 justify-end animate-fade-in-up">
                     <div class="bg-blue-600 text-white px-4 py-2 rounded-2xl rounded-tr-none shadow-sm text-sm max-w-[85%]">
-                        ${text}
+                        ${safeText}
                     </div>
                 </div>`;
             history.insertAdjacentHTML('beforeend', html);
