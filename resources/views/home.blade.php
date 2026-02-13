@@ -70,7 +70,20 @@
     </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen md:h-screen w-screen md:overflow-hidden flex items-center justify-center p-4">
+<body class="bg-gray-100 min-h-screen md:h-screen w-screen md:overflow-hidden flex items-center justify-center p-4 relative">
+    
+    <!-- Admin Login / Dashboard Button (Top Right) -->
+    <div class="absolute top-4 right-4 z-50">
+        @auth
+            <a href="{{ route('admin.index') }}" class="bg-white text-gray-700 hover:text-green-600 px-4 py-2 rounded-lg shadow-sm font-bold text-sm flex items-center gap-2 transition hover:shadow-md border border-gray-200">
+                <i class="fa-solid fa-gauge-high"></i> Dashboard
+            </a>
+        @else
+            <a href="{{ route('login') }}" class="bg-white/80 backdrop-blur text-gray-500 hover:text-blue-600 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition hover:bg-white hover:shadow-sm border border-transparent hover:border-blue-100">
+                <i class="fa-solid fa-lock"></i> Admin Login
+            </a>
+        @endauth
+    </div>
 
     <div
         class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-auto md:h-[90vh] flex flex-col md:flex-row overflow-hidden relative">
