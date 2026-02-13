@@ -70,13 +70,14 @@
     </style>
 </head>
 
-<body class="bg-gray-100 h-screen w-screen overflow-hidden flex items-center justify-center p-4">
+<body class="bg-gray-100 min-h-screen md:h-screen w-screen md:overflow-hidden flex items-center justify-center p-4">
 
     <div
-        class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col md:flex-row overflow-hidden relative">
+        class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-auto md:h-[90vh] flex flex-col md:flex-row overflow-hidden relative">
 
         <!-- ========== PANEL KIRI: DIAGNOSA FOTO ========== -->
-        <div class="w-full md:w-4/12 border-r border-gray-200 bg-white flex flex-col h-full relative z-20 shadow-md">
+        <div
+            class="w-full md:w-4/12 border-r border-gray-200 bg-white flex flex-col h-auto md:h-full relative z-20 shadow-md">
 
             <div class="p-5 border-b flex justify-between items-center bg-gray-50">
                 <div class="flex items-center gap-2">
@@ -131,14 +132,14 @@
                     </div>
                 </div>
 
-               <div class="text-xs text-gray-400 text-center mt-4">
+                <div class="text-xs text-gray-400 text-center mt-4">
                     <p>Aplikasi ini Dikembangkan TIm KKN Desa Cikurubuk</p>
                 </div>
             </div>
         </div>
 
         <!-- ========== PANEL KANAN: CHATBOT ========== -->
-        <div class="w-full md:w-8/12 bg-white flex flex-col h-full relative z-10">
+        <div class="w-full md:w-8/12 bg-white flex flex-col h-[80vh] md:h-full relative z-10">
 
             <!-- Header Chat -->
             <div class="p-4 border-b flex items-center justify-between bg-white z-10 shadow-sm">
