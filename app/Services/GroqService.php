@@ -173,21 +173,25 @@ Aturan:
     protected function sendRequest(array $messages, string $model): string
     {
         try {
-            $response = Http::withHeaders([
+            $http = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->apiKey,
                 'Content-Type' => 'application/json',
-            ])->timeout(60)->post("{$this->baseUrl}/chat/completions", [
-                        'model' => $model,
-                        'messages' => $messages,
-                        'temperature' => 0.7,
-                        'max_tokens' => 2048,
-                    ]);
+            ])->timeout(60);
+
+            // Bypass SSL verification in local environment to fix common Windows/XAMPP issues
+            if (config('app.env') === 'local') {
+                $http->withoutVerifying();
+            }
+
+            $response = $http->post("{$this->baseUrl}/chat/completions", [
+                'model' => $model,
+                'messages' => $messages,
+                'temperature' => 0.7,
+                'max_tokens' => 2048,
+            ]);
 
             if ($response->failed()) {
-                Log::error('Groq API Error', [
-                    'status' => $response->status(),
-                    'body' => $response->body(),
-                ]);
+                Log::error('Groq API Error: ' . $response->body());
                 return '⚠️ Gagal mendapatkan respons dari AI. Status: ' . $response->status();
             }
 
@@ -195,7 +199,7 @@ Aturan:
             return $data['choices'][0]['message']['content'] ?? '⚠️ Respons kosong dari AI.';
 
         } catch (\Exception $e) {
-            Log::error('Groq API Exception', ['error' => $e->getMessage()]);
+            Log::error('Groq API Exception: ' . $e->getMessage());
             return '⚠️ Koneksi ke AI gagal: ' . $e->getMessage();
         }
     }
