@@ -133,7 +133,8 @@
 
                 <div class="text-xs text-gray-400 text-center mt-4">
                     <p>
-                        Kerjasama Antara Tim KKN Serta Pemerintah Desa Cikurubuk
+                        Kerjasama Antara Tim KKN dan 
+                        Pemerintahan Desa Cikurubuk
                     </p>
                 </div>
             </div>
