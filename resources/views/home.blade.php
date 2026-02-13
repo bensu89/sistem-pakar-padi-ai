@@ -255,7 +255,7 @@
                     </button>
                     <!-- Text Input -->
                     <div class="flex-1 relative">
-                        <input type="text" id="chatInput"
+                        <input type="text" id="chatInput" autocomplete="off"
                             class="w-full bg-gray-100 border-transparent focus:bg-white focus:border-blue-500 border rounded-full px-5 py-3 text-sm transition outline-none shadow-inner pr-12"
                             placeholder="Tanyakan sesuatu tentang pertanian padi...">
                         <button type="submit" id="btnSendChat"
