@@ -133,7 +133,7 @@
                 </div>
 
                 <div class="text-xs text-gray-400 text-center mt-4">
-                    <p>Aplikasi ini Dikembangkan TIm KKN Desa Cikurubuk</p>
+                    <p>Aplikasi ini Dikembangkan Tim KKN Desa Cikurubuk</p>
                 </div>
             </div>
         </div>
