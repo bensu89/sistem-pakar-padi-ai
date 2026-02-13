@@ -3,12 +3,16 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DiagnosisController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ChatController;
 
 // 1. Halaman Utama (Scan & Chat)
 Route::get('/', [DiagnosisController::class, 'index'])->name('home');
 
-// 2. Proses Analisa (Upload ke AI)
+// 2. Proses Analisa (Upload ke AI Groq Vision)
 Route::post('/analyze', [DiagnosisController::class, 'analyze'])->name('analyze');
+
+// 3. Chat AI (Text, File, URL)
+Route::post('/chat', [ChatController::class, 'sendMessage'])->name('chat.send');
 
 // Authentication Routes (Login, Register, Logout, dll)
 Auth::routes();

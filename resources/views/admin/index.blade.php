@@ -17,8 +17,8 @@
                 <i class="fa-solid fa-seedling text-xl"></i>
             </div>
             <div>
-                <h1 class="font-bold text-gray-800 text-lg">Panel Peneliti</h1>
-                <p class="text-xs text-gray-500">Monitoring Diagnosa AI</p>
+                <h1 class="font-bold text-gray-800 text-lg">Pohaci AI: Ngariksa Pare, Ngajaga Lemah Cai</h1>
+                <p class="text-xs text-gray-500">Monitoring Diagnosa Daun Padi</p>
             </div>
         </div>
         <div class="flex gap-3">
