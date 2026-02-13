@@ -505,11 +505,19 @@
 
             } catch (error) {
                 console.error(error);
-                console.error(error);
-                let msg = "Koneksi AI gagal. Coba lagi.";
-                if (error.response && error.response.data) {
-                    msg = error.response.data.error || error.response.data.message || msg;
+                let msg = error.message || "Koneksi AI gagal.";
+                
+                if (error.response) {
+                    // Jika response ada (bukan network error)
+                    if (typeof error.response.data === 'string') {
+                        // Response HTML (biasanya 500 error page atau 504 timeout)
+                        msg = `Server Error (${error.response.status}): Cek Logs Vercel.`;
+                    } else if (error.response.data) {
+                        // Response JSON
+                        msg = error.response.data.error || error.response.data.message || msg;
+                    }
                 }
+                
                 addBotMessage("⚠️ " + escapeHtml(msg));
             } finally {
                 document.getElementById('chatLoading').classList.add('hidden');
@@ -539,7 +547,7 @@
             const bubble = `
                 <div class="flex gap-3 animate-fade-in-up">
                     <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-1">
-                        <i class="fa-solid fa-robot text-green-600 text-xs"></i>
+             <i class="fa-solid fa-robot text-green-600 text-xs"></i>
                     </div>
                     <div class="bg-white px-4 py-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-700 max-w-[90%] border border-gray-100 leading-relaxed">
                         ${htmlContent}
