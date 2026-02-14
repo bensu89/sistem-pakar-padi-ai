@@ -16,7 +16,8 @@
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.4",
         "symfony/css-selector": "^6.0",
-        "symfony/dom-crawler": "^6.0"
+        "symfony/dom-crawler": "^6.0",
+        "voku/portable-ascii": "2.0.1 as 1.6.1"
     },
     "require-dev": {
         "facade/ignition": "^2.5",
