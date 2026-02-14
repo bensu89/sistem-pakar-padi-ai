@@ -109,7 +109,7 @@ Aturan:
         $userMessage = "Berikut adalah konten teks dari artikel URL: {$url}\n\n[MULAI KONTEN]\n{$textContent}\n[AKHIR KONTEN]\n\nInstruksi User: {$message}";
 
         $messages = [
-            ['role' => 'system', 'content' => $this->systemPrompt . "\n\nPENTING: User memberikan konten artikel dari URL. Jawab pertanyaan user HANYA berdasarkan informasi yang ada di [MULAI KONTEN] sampai [AKHIR KONTEN]. Jika informasi tidak ada di artikel, katakan 'Maaf, informasi tersebut tidak ditemukan dalam artikel yang Anda berikan'."],
+            ['role' => 'system', 'content' => $this->systemPrompt . "\n\nINSTRUKSI KHUSUS (RAG MODE):\nUser memberikan teks artikel dari URL. Tugas Anda adalah mengekstrak informasi dengan sangat teliti, seperti 'Detektif Data'.\n\nATURAN RAG:\n1. Jawab HANYA berdasarkan informasi yang ada di [MULAI KONTEN] sampai [AKHIR KONTEN].\n2. Cek setiap kalimat. Jangan lewatkan detail kecil seperti nama ilmiah (biasanya italic/kurung), persentase angka, atau dosis obat.\n3. Jika tertulis 'Rhizoctonia solani', 'Xanthomonas', atau angka '40%', '25%', WAJIB DISEBUTKAN.\n4. Jika informasi benar-benar tidak ada di teks, katakan jujur: 'Maaf, informasi spesifik tersebut tidak ditemukan dalam artikel ini, namun secara umum...'."],
             ['role' => 'user', 'content' => $userMessage],
         ];
 
@@ -172,8 +172,9 @@ Aturan:
             // Bersihkan whitespace
             $text = preg_replace('/\s+/', ' ', trim($text));
 
-            // Batasi panjang
-            return mb_substr($text, 0, 6000);
+            // Batasi panjang (Naikkan ke 15,000 karakter agar tidak terpotong)
+            // Llama 3 context window besar, manfaatkan.
+            return mb_substr($text, 0, 15000);
 
         } catch (\Exception $e) {
             return "⚠️ Error saat scraping URL: " . $e->getMessage();
@@ -248,8 +249,8 @@ Aturan:
             $response = $http->post("{$this->baseUrl}/chat/completions", [
                 'model' => $model,
                 'messages' => $messages,
-                'temperature' => 0.7,
-                'max_tokens' => 2048,
+                'temperature' => 0.6, // Turunkan temperature agar lebih fokus fakta
+                'max_tokens' => 4096,
             ]);
 
             if ($response->failed()) {
