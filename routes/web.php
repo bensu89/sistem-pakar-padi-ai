@@ -23,6 +23,23 @@ Route::middleware('auth')->group(function () {
     // 3. Halaman Dashboard (Monitoring)
     Route::get('/monitoring-penelitian', [AdminController::class, 'index'])->name('admin.index');
 
+    // --- TENTATIVE: ROUTE UNTUK RESET/BUAT USER ADMIN (HAPUS NANTI SETELAH DIPAKAI) ---
+    Route::get('/setup-admin', function () {
+        try {
+            $user = \App\Models\User::updateOrCreate(
+                ['email' => 'admin@padi.com'],
+                [
+                    'name' => 'Admin Padi',
+                    'password' => bcrypt('password'), // Password default
+                    'email_verified_at' => now(),
+                ]
+            );
+            return "User Admin Berhasil Dibuat!<br>Email: admin@padi.com<br>Password: password<br><a href='/login'>Login Disini</a>";
+        } catch (\Exception $e) {
+            return "Gagal: " . $e->getMessage();
+        }
+    });
+
     // 4. Hapus Data Diagnosa Valid
     Route::delete('/monitoring-penelitian/{id}', [AdminController::class, 'destroy'])->name('admin.destroy');
 
