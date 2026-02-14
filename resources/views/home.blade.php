@@ -313,6 +313,9 @@
                         </button>
                     </div>
                 </form>
+                <div class="text-center text-xs text-gray-400 mt-2">
+                    Pohaci AI is AI and can make mistakes.
+                </div>
             </div>
         </div>
     </div>
