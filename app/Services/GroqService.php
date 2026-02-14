@@ -106,6 +106,11 @@ Aturan:
             return $this->scrapeUrl($url);
         });
 
+        // SAFETY GATE: Pastikan konten tidak kosong sebelum dikirim ke AI
+        if (strlen($textContent) < 200) {
+            return "⚠️ **Gagal Membaca Artikel**: Sistem tidak dapat mengambil isi teks dari URL tersebut (Konten terlalu pendek/kosong). Mohon pastikan URL valid dan dapat diakses publik.\n\nTips: Coba copy-paste isi artikelnya langsung ke chat.";
+        }
+
         $userMessage = "Berikut adalah konten teks dari artikel URL: {$url}\n\n[MULAI KONTEN]\n{$textContent}\n[AKHIR KONTEN]\n\nInstruksi User: {$message}";
 
         $messages = [
