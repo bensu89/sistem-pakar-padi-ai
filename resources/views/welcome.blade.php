@@ -81,7 +81,7 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+    <section class="relative pt-24 pb-12 lg:pt-48 lg:pb-32 overflow-hidden">
         <div class="absolute inset-0 hero-pattern z-0"></div>
         <div class="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white z-0"></div>
 
@@ -103,7 +103,7 @@
                 ✨ TEKNOLOGI PERTANIAN 4.0
             </span>
 
-            <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 tracking-tight mb-6 leading-tight">
+            <h1 class="text-3xl md:text-6xl font-extrabold text-gray-900 tracking-tight mb-6 leading-snug md:leading-tight">
                 Pohaci AI, <br>
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-500">
                     Ngariksa Pare, Ngajaga Lemah Cai
