@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class GroqService
 {
@@ -102,63 +103,7 @@ Aturan:
         $cacheKey = 'scraped_url_' . md5($url);
 
         $textContent = Cache::remember($cacheKey, 3600, function () use ($url) {
-            $text = '';
-
-            // 1. COBA JINA READER (Prioritas Utama - Markdown Bersih)
-            try {
-                // Timeout dipercepat (10s) agar tidak menunggu lama jika down
-                $jinaUrl = "https://r.jina.ai/" . $url;
-                $response = Http::timeout(10)->get($jinaUrl);
-
-                if ($response->successful()) {
-                    $text = $response->body();
-                    // Validasi panjang konten Jina
-                    if (strlen($text) > 50) {
-                        return mb_substr($text, 0, 10000);
-                    }
-                }
-            } catch (\Exception $e) {
-                Log::warning("Jina Reader failed for URL {$url}: " . $e->getMessage());
-                // Lanjut ke fallback...
-            }
-
-            // 2. FALLBACK: DOM CRAWLER (Scraping Lokal)
-            try {
-                // Gunakan User-Agent browser asli
-                $response = Http::withHeaders([
-                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                ])->timeout(15)->get($url);
-
-                if ($response->failed()) {
-                    return "⚠️ Gagal mengakses URL (Status: {$response->status()}). Pastikan URL publik.";
-                }
-
-                $htmlContent = $response->body();
-
-                if (class_exists(\Symfony\Component\DomCrawler\Crawler::class)) {
-                    $crawler = new \Symfony\Component\DomCrawler\Crawler($htmlContent);
-
-                    // Hapus elemen sampah
-                    $crawler->filter('script, style, nav, footer, header, aside, iframe, noscript, svg, .ad, .ads, .popup, .login, .signup, .menu, .sidebar')->each(function ($node) {
-                        foreach ($node as $n) {
-                            $n->parentNode->removeChild($n);
-                        }
-                    });
-
-                    $text = $crawler->filter('body')->text();
-                } else {
-                    $text = strip_tags($htmlContent);
-                }
-
-                // Bersihkan whitespace
-                $text = preg_replace('/\s+/', ' ', trim($text));
-
-                // Batasi panjang
-                return mb_substr($text, 0, 6000);
-
-            } catch (\Exception $e) {
-                return "⚠️ Error saat scraping URL: " . $e->getMessage();
-            }
+            return $this->scrapeUrl($url);
         });
 
         $userMessage = "Berikut adalah konten teks dari artikel URL: {$url}\n\n[MULAI KONTEN]\n{$textContent}\n[AKHIR KONTEN]\n\nInstruksi User: {$message}";
@@ -169,6 +114,70 @@ Aturan:
         ];
 
         return $this->sendRequest($messages, $model);
+    }
+
+    /**
+     * Scrape URL content (Jina Reader + DomCrawler Fallback)
+     */
+    public function scrapeUrl(string $url): string
+    {
+        $text = '';
+
+        // 1. COBA JINA READER (Prioritas Utama - Markdown Bersih)
+        try {
+            // Timeout dipercepat (10s) agar tidak menunggu lama jika down
+            $jinaUrl = "https://r.jina.ai/" . $url;
+            $response = Http::timeout(10)->get($jinaUrl);
+
+            if ($response->successful()) {
+                $text = $response->body();
+                // Validasi panjang konten Jina
+                if (strlen($text) > 50) {
+                    return mb_substr($text, 0, 10000);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::warning("Jina Reader failed for URL {$url}: " . $e->getMessage());
+            // Lanjut ke fallback...
+        }
+
+        // 2. FALLBACK: DOM CRAWLER (Scraping Lokal)
+        try {
+            // Gunakan User-Agent browser asli
+            $response = Http::withHeaders([
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            ])->timeout(15)->get($url);
+
+            if ($response->failed()) {
+                return "⚠️ Gagal mengakses URL (Status: {$response->status()}). Pastikan URL publik.";
+            }
+
+            $htmlContent = $response->body();
+
+            if (class_exists(\Symfony\Component\DomCrawler\Crawler::class)) {
+                $crawler = new \Symfony\Component\DomCrawler\Crawler($htmlContent);
+
+                // Hapus elemen sampah
+                $crawler->filter('script, style, nav, footer, header, aside, iframe, noscript, svg, .ad, .ads, .popup, .login, .signup, .menu, .sidebar')->each(function ($node) {
+                    foreach ($node as $n) {
+                        $n->parentNode->removeChild($n);
+                    }
+                });
+
+                $text = $crawler->filter('body')->text();
+            } else {
+                $text = strip_tags($htmlContent);
+            }
+
+            // Bersihkan whitespace
+            $text = preg_replace('/\s+/', ' ', trim($text));
+
+            // Batasi panjang
+            return mb_substr($text, 0, 6000);
+
+        } catch (\Exception $e) {
+            return "⚠️ Error saat scraping URL: " . $e->getMessage();
+        }
     }
 
     /**
