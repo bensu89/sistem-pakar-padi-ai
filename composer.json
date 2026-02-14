@@ -11,13 +11,14 @@
         "php": "^7.3|^8.0",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
-        "laravel/framework": "^8.75",
+        "laravel/framework": "^8.83",
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.4",
         "symfony/css-selector": "^6.0",
         "symfony/dom-crawler": "^6.0",
-        "voku/portable-ascii": "2.0.1 as 1.6.1"
+        "symfony/translation": "^6.0",
+        "voku/portable-ascii": "2.0.3 as 1.6.1"
     },
     "require-dev": {
         "facade/ignition": "^2.5",
