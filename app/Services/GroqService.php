@@ -244,35 +244,54 @@ Aturan:
      */
     protected function sendRequest(array $messages, string $model): string
     {
-        try {
-            $http = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Content-Type' => 'application/json',
-            ])->timeout(60);
+        $maxRetries = 3;
+        $attempt = 0;
+        $backoff = 2; // Detik awal
 
-            // Bypass SSL verification in local environment to fix common Windows/XAMPP issues
-            if (config('app.env') === 'local') {
-                $http->withoutVerifying();
-            }
+        do {
+            $attempt++;
+            try {
+                $http = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Content-Type' => 'application/json',
+                ])->timeout(60);
 
-            $response = $http->post("{$this->baseUrl}/chat/completions", [
-                'model' => $model,
-                'messages' => $messages,
-                'temperature' => 0.6, // Turunkan temperature agar lebih fokus fakta
-                'max_tokens' => 4096,
-            ]);
+                if (config('app.env') === 'local') {
+                    $http->withoutVerifying();
+                }
 
-            if ($response->failed()) {
+                $response = $http->post("{$this->baseUrl}/chat/completions", [
+                    'model' => $model,
+                    'messages' => $messages,
+                    'temperature' => 0.6,
+                    'max_tokens' => 4096,
+                ]);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    return $data['choices'][0]['message']['content'] ?? '⚠️ Respons kosong dari AI.';
+                }
+
+                // Handle 429 Specifically
+                if ($response->status() === 429) {
+                    Log::warning("Groq Rate Limit (429). Retrying attempt {$attempt}/{$maxRetries}...");
+                    if ($attempt < $maxRetries) {
+                        sleep($backoff);
+                        $backoff *= 2; // Exponential backoff (2s, 4s, 8s)
+                        continue;
+                    }
+                    return '⚠️ Terlalu banyak permintaan (Rate Limit). Silakan tunggu beberapa saat lagi.';
+                }
+
                 Log::error('Groq API Error: ' . $response->body());
                 return '⚠️ Gagal mendapatkan respons dari AI. Status: ' . $response->status();
+
+            } catch (\Exception $e) {
+                Log::error('Groq API Exception: ' . $e->getMessage());
+                return '⚠️ Koneksi ke AI gagal: ' . $e->getMessage();
             }
+        } while ($attempt < $maxRetries);
 
-            $data = $response->json();
-            return $data['choices'][0]['message']['content'] ?? '⚠️ Respons kosong dari AI.';
-
-        } catch (\Exception $e) {
-            Log::error('Groq API Exception: ' . $e->getMessage());
-            return '⚠️ Koneksi ke AI gagal: ' . $e->getMessage();
-        }
+        return '⚠️ Gagal menghubungi AI setelah beberapa percobaan.';
     }
 }
