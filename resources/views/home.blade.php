@@ -109,25 +109,25 @@
 
             <div class="flex-1 overflow-y-auto p-5 space-y-4">
                 <form id="uploadForm" class="space-y-3">
-                    <div class="border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 hover:bg-green-50 transition cursor-pointer relative h-48 flex flex-col justify-center items-center group overflow-hidden"
+                    <div class="border-2 border-dashed border-green-300 rounded-2xl bg-green-50/50 hover:bg-green-100/50 transition cursor-pointer relative h-64 flex flex-col justify-center items-center group overflow-hidden shadow-inner"
                         id="dropZone">
                         <input type="file" id="imageInput" name="image"
                             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" accept="image/*"
                             required>
                         <div id="previewContainer" class="hidden w-full h-full absolute inset-0 bg-white">
-                            <img id="imagePreview" src="" class="w-full h-full object-contain">
+                            <img id="imagePreview" src="" class="w-full h-full object-contain p-2">
                         </div>
-                        <div id="uploadPrompt" class="group-hover:scale-110 transition duration-300 text-center p-4">
-                            <div class="bg-white p-3 rounded-full shadow-sm inline-block mb-2">
-                                <i class="fa-solid fa-camera text-2xl text-green-500"></i>
+                        <div id="uploadPrompt" class="group-hover:scale-105 transition duration-300 text-center p-6">
+                            <div class="bg-white p-5 rounded-full shadow-md inline-block mb-4 animate-bounce">
+                                <i class="fa-solid fa-camera text-4xl text-green-600"></i>
                             </div>
-                            <p class="text-gray-500 font-medium text-sm">Klik atau Tarik Foto</p>
-                            <p class="text-gray-400 text-xs mt-1">Format: JPG, PNG</p>
+                            <p class="text-gray-700 font-bold text-lg">Ambil / Upload Foto</p>
+                            <p class="text-gray-500 text-sm mt-1">Pastikan bagian daun terlihat jelas</p>
                         </div>
                     </div>
                     <button type="submit" id="btnDiagnosa"
-                        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition shadow-md flex justify-center items-center gap-2 active:scale-95">
-                        <i class="fa-solid fa-microscope"></i> Analisa Foto
+                        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl transition shadow-lg hover:shadow-green-500/30 flex justify-center items-center gap-3 active:scale-95 text-lg">
+                        <i class="fa-solid fa-magnifying-glass-chart"></i> Mulai Cek Penyakit
                     </button>
                 </form>
 
@@ -237,6 +237,26 @@
                 </div>
             </div>
 
+            <!-- Quick Actions Chips -->
+            <div id="quickActions" class="px-4 pb-2 flex gap-2 overflow-x-auto no-scrollbar mask-gradient">
+                <button onclick="fillChat('Cara mengatasi hama wereng coklat?')"
+                    class="flex-shrink-0 bg-white border border-green-200 text-green-700 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-green-50 transition shadow-sm whitespace-nowrap">
+                    🦠 Hama Wereng
+                </button>
+                <button onclick="fillChat('Rekomendasi pupuk untuk padi usia 30 hari?')"
+                    class="flex-shrink-0 bg-white border border-blue-200 text-blue-700 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-blue-50 transition shadow-sm whitespace-nowrap">
+                    💊 Rekomendasi Pupuk
+                </button>
+                <button onclick="fillChat('Penyakit apa yang membuat daun padi menguning?')"
+                    class="flex-shrink-0 bg-white border border-yellow-200 text-yellow-700 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-yellow-50 transition shadow-sm whitespace-nowrap">
+                    🍂 Daun Menguning
+                </button>
+                <button onclick="fillChat('Cara mencegah penyakit blas pada padi?')"
+                    class="flex-shrink-0 bg-white border border-red-200 text-red-700 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-red-50 transition shadow-sm whitespace-nowrap">
+                    🍄 Pencegahan Blas
+                </button>
+            </div>
+
             <!-- URL Input Bar (hidden by default) -->
             <div id="urlInputBar" class="hidden border-t bg-purple-50 px-4 py-2 flex items-center gap-2">
                 <i class="fa-solid fa-link text-purple-500 text-sm"></i>
@@ -272,11 +292,11 @@
                     <!-- Text Input -->
                     <div class="flex-1 relative">
                         <textarea id="chatInput" rows="1"
-                            class="w-full bg-gray-100 border-transparent focus:bg-white focus:border-blue-500 border rounded-2xl px-5 py-3 text-sm transition outline-none shadow-inner pr-12 resize-none overflow-hidden"
-                            placeholder="Tanyakan sesuatu tentang pertanian padi... (Shift+Enter baris baru)"></textarea>
+                            class="w-full bg-gray-100 border-2 border-transparent focus:bg-white focus:border-green-500 rounded-2xl px-5 py-4 text-base transition outline-none shadow-inner pr-14 resize-none overflow-hidden placeholder-gray-500"
+                            placeholder="Tulis pertanyaanmu di sini..."></textarea>
                         <button type="submit" id="btnSendChat"
-                            class="absolute right-2 bottom-2 bg-blue-600 hover:bg-blue-700 text-white w-9 h-9 rounded-full flex items-center justify-center transition shadow-md">
-                            <i class="fa-solid fa-paper-plane text-xs"></i>
+                            class="absolute right-2 bottom-2 bg-green-600 hover:bg-green-700 text-white w-10 h-10 rounded-full flex items-center justify-center transition shadow-md p-2">
+                            <i class="fa-solid fa-paper-plane text-sm"></i>
                         </button>
                     </div>
                 </form>
@@ -600,6 +620,15 @@
                 confirmUrl();
             }
         });
+
+        // Quick Action Chip Handler
+        function fillChat(text) {
+            const input = document.getElementById('chatInput');
+            input.value = text;
+            input.focus();
+            // Optional: Auto submit? Maybe better to let user confirm.
+            // document.getElementById('chatForm').requestSubmit(); 
+        }
     </script>
 </body>
 

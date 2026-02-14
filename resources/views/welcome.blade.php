@@ -81,68 +81,73 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="relative pt-24 pb-12 lg:pt-48 lg:pb-32 overflow-hidden">
-        <div class="absolute inset-0 hero-pattern z-0"></div>
-        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white z-0"></div>
-
-        <!-- Decoration Blobs -->
-        <div
-            class="absolute top-20 left-10 w-72 h-72 bg-green-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob">
-        </div>
-        <div
-            class="absolute top-20 right-10 w-72 h-72 bg-emerald-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000">
-        </div>
-        <div
-            class="absolute -bottom-32 left-1/2 w-96 h-96 bg-teal-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000">
-        </div>
+    <section class="relative pt-24 pb-12 lg:pt-40 lg:pb-32 overflow-hidden bg-gradient-to-b from-green-50 to-white">
+        <!-- Decoration -->
+        <div class="absolute inset-0 hero-pattern opacity-10"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
 
-            <span
-                class="inline-block py-1 px-3 rounded-full bg-green-100 text-green-700 text-xs font-bold tracking-wide mb-6 border border-green-200 shadow-sm">
-                ✨ TEKNOLOGI PERTANIAN 4.0
-            </span>
+            <div
+                class="inline-flex items-center gap-2 bg-green-100 border border-green-200 rounded-full px-4 py-1.5 mb-8 shadow-sm">
+                <span class="flex h-3 w-3 relative">
+                    <span
+                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </span>
+                <span class="text-green-800 text-sm font-bold tracking-wide uppercase">Teknologi Tepat Guna</span>
+            </div>
 
-            <h1 class="text-3xl md:text-6xl font-extrabold text-gray-900 tracking-tight mb-6 leading-snug md:leading-tight">
-                Pohaci AI, <br>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-500">
-                    Ngariksa Pare, Ngajaga Lemah Cai
+            <h1 class="text-4xl md:text-7xl font-extrabold text-gray-900 tracking-tight mb-6 leading-tight">
+                Jaga Panen Padi <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-600 via-emerald-500 to-teal-500">
+                    Bebas Penyakit & Hama
                 </span>
             </h1>
 
-            <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-600 mb-12 leading-relaxed">
-                Asisten cerdas untuk mendeteksi penyakit padi secara instan menggunakan AI Vision. Konsultasi masalah
-                pertanian kapan saja, gratis.
+            <p class="mt-6 max-w-3xl mx-auto text-xl md:text-2xl text-gray-600 mb-10 leading-relaxed font-light">
+                Asisten cerdas untuk petani Indonesia. Cukup <b>foto daun padi</b>, AI kami langsung mendeteksi penyakit
+                dan memberi solusi penyembuhan.
             </p>
 
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <div class="flex flex-col sm:flex-row justify-center gap-5">
                 <a href="{{ route('home') }}"
-                    class="px-8 py-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-2xl shadow-xl shadow-green-600/30 transition transform hover:-translate-y-1 hover:scale-105 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-camera"></i> Scan Tanaman Sekarang
+                    class="group relative inline-flex items-center justify-center px-8 py-5 text-lg font-bold text-white transition-all duration-200 bg-green-600 font-pj rounded-2xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 hover:bg-green-700 shadow-xl hover:shadow-2xl hover:-translate-y-1">
+                    <span class="mr-3 text-2xl"><i class="fa-solid fa-camera"></i></span>
+                    Cek Kesehatan Padi
+                    <div
+                        class="absolute -top-3 -right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md animate-bounce">
+                        GRATIS!
+                    </div>
                 </a>
-                <a href="#demo-video"
-                    class="px-8 py-4 bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-2xl shadow-md border border-gray-200 transition transform hover:-translate-y-1 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-circle-play text-green-600"></i> Lihat Demo
+
+                <a href="#fitur"
+                    class="inline-flex items-center justify-center px-8 py-5 text-lg font-bold text-gray-700 transition-all duration-200 bg-white border-2 border-gray-200 font-pj rounded-2xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 hover:bg-gray-50 hover:text-green-600 hover:border-green-200 shadow-sm hover:shadow-md">
+                    <i class="fa-solid fa-circle-play mr-2 text-green-500 text-xl"></i>
+                    Cara Pakai
                 </a>
             </div>
 
-            <!-- Stats -->
-            <div class="mt-16 pt-8 border-t border-gray-200/60 max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
-                <div>
-                    <h4 class="text-3xl font-bold text-gray-900">98%</h4>
-                    <p class="text-sm text-gray-500 font-medium">Akurasi AI</p>
+            <!-- Stats with Icons -->
+            <div class="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-5xl mx-auto">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                    <div class="text-green-500 text-3xl mb-2"><i class="fa-solid fa-bullseye"></i></div>
+                    <h4 class="text-4xl font-bold text-gray-900">98%</h4>
+                    <p class="text-gray-500 font-medium">Akurasi Deteksi</p>
                 </div>
-                <div>
-                    <h4 class="text-3xl font-bold text-gray-900">&lt; 2dtk</h4>
-                    <p class="text-sm text-gray-500 font-medium">Kecepatan Diagnosa</p>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                    <div class="text-blue-500 text-3xl mb-2"><i class="fa-solid fa-bolt"></i></div>
+                    <h4 class="text-4xl font-bold text-gray-900">&lt; 2dtk</h4>
+                    <p class="text-gray-500 font-medium">Proses Cepat</p>
                 </div>
-                <div>
-                    <h4 class="text-3xl font-bold text-gray-900">24/7</h4>
-                    <p class="text-sm text-gray-500 font-medium">Siap Melayani</p>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                    <div class="text-purple-500 text-3xl mb-2"><i class="fa-solid fa-clock"></i></div>
+                    <h4 class="text-4xl font-bold text-gray-900">24 Jam</h4>
+                    <p class="text-gray-500 font-medium">Siap Membantu</p>
                 </div>
-                <div>
-                    <h4 class="text-3xl font-bold text-gray-900">Gratis</h4>
-                    <p class="text-sm text-gray-500 font-medium">Untuk Petani</p>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                    <div class="text-orange-500 text-3xl mb-2"><i class="fa-solid fa-rupiah-sign"></i></div>
+                    <h4 class="text-4xl font-bold text-gray-900">0 Rp</h4>
+                    <p class="text-gray-500 font-medium">Tanpa Biaya</p>
                 </div>
             </div>
         </div>
