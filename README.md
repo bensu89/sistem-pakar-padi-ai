@@ -29,15 +29,15 @@
   - **URL (🔗 Link)**: Analisa konten artikel/berita pertanian dari link eksternal.
 - **Dynamic Model**: Otomatis memilih model bahasa yang tepat (Llama 3.3 70B untuk chat kompleks, Mixtral untuk kecepatan).
 
-### � Responsive & Mobile-First
-- Tampilan optimal di HP dan Desktop.
-- Desain modern menggunakan **Tailwind CSS**.
-- Mode layar penuh untuk pengalaman aplikasi native.
+### 📱 Antarmuka Ramah Petani (Farmer-Friendly UI)
+- **Desain Mobile-First**: Tombol besar, kontras tinggi, mudah digunakan di HP saat di sawah.
+- **Aksi Cepat (Quick Actions)**: Chip pertanyaan instan ("Hama Wereng", "Pupuk") tanpa perlu mengetik panjang.
+- **Responsif & Ringan**: Tampilan bersih tanpa scrollbar mengganggu, optimal untuk sinyal desa.
 
-### �️ Dashboard Admin
-- Statistik penggunaan AI.
-- Manajemen data diagnosa.
-- Export laporan (Excel/CSV).
+### 🚜 Dashboard Admin Terintegrasi
+- Statistik penggunaan AI real-time.
+- Manajemen data diagnosa & riwayat chat.
+- Export laporan (Excel/CSV) untuk dinas/kelompok tani.
 
 ---
 
@@ -45,10 +45,10 @@
 
 | Komponen | Teknologi | Keterangan |
 |----------|-----------|------------|
-| **Framework** | Laravel 8.x | Backend PHP robust & aman |
+| **Framework** | Laravel 8.83 | Backend PHP robust & stabil (PHP 8.4 Support) |
 | **Database** | PostgreSQL (Supabase) | Cloud database scalable |
-| **AI Engine** | Groq API | Inference super cepat (Llama 3 series) |
-| **Frontend** | Blade + Tailwind CSS | UI responsif & ringan |
+| **AI Engine** | Groq API | Inference super cepat (Llama 3.3 70B & Vision) |
+| **Frontend** | Blade + Tailwind CSS | UI responsif & mobile-first |
 | **Hosting** | Vercel (Serverless) | Deployment otomatis & performa tinggi |
 
 ---
@@ -139,6 +139,10 @@ Aplikasi ini sudah dikonfigurasi untuk **Vercel** serverless environment.
 
 ### 3. Login Gagal "Credentials do not match" (Database Kosong)
 - **Solusi**: Buka route `/setup-admin` di browser (`https://.../setup-admin`) untuk membuat user admin default (`admin@padi.com` / `password`).
+
+### 4. PHP 8.4 Deprecation Warnings
+- **Problem**: Muncul warning `Implicitly marking parameter...` di log Vercel.
+- **Solusi**: Aplikasi ini sudah dipatch (Feb 2026) menggunakan `voku/portable-ascii` v2.0.3+ dan `symfony/translation` v6+. Pastikan redeploy dengan "Clear Cache".
 
 ---
 
