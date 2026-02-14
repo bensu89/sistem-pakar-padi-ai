@@ -70,16 +70,19 @@
     </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen md:h-screen w-screen md:overflow-hidden flex items-center justify-center p-4 relative">
-    
+<body
+    class="bg-gray-100 min-h-screen md:h-screen w-screen md:overflow-hidden flex items-center justify-center p-4 relative">
+
     <!-- Admin Login / Dashboard Button (Top Right) -->
     <div class="absolute top-4 right-4 z-50">
         @auth
-            <a href="{{ route('admin.index') }}" class="bg-white text-gray-700 hover:text-green-600 px-4 py-2 rounded-lg shadow-sm font-bold text-sm flex items-center gap-2 transition hover:shadow-md border border-gray-200">
+            <a href="{{ route('admin.index') }}"
+                class="bg-white text-gray-700 hover:text-green-600 px-4 py-2 rounded-lg shadow-sm font-bold text-sm flex items-center gap-2 transition hover:shadow-md border border-gray-200">
                 <i class="fa-solid fa-gauge-high"></i> Dashboard
             </a>
         @else
-            <a href="{{ route('login') }}" class="bg-white/80 backdrop-blur text-gray-500 hover:text-blue-600 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition hover:bg-white hover:shadow-sm border border-transparent hover:border-blue-100">
+            <a href="{{ route('login') }}"
+                class="bg-white/80 backdrop-blur text-gray-500 hover:text-blue-600 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition hover:bg-white hover:shadow-sm border border-transparent hover:border-blue-100">
                 <i class="fa-solid fa-lock"></i> Admin Login
             </a>
         @endauth
@@ -268,11 +271,11 @@
                     </button>
                     <!-- Text Input -->
                     <div class="flex-1 relative">
-                        <input type="text" id="chatInput" autocomplete="off"
-                            class="w-full bg-gray-100 border-transparent focus:bg-white focus:border-blue-500 border rounded-full px-5 py-3 text-sm transition outline-none shadow-inner pr-12"
-                            placeholder="Tanyakan sesuatu tentang pertanian padi...">
+                        <textarea id="chatInput" rows="1"
+                            class="w-full bg-gray-100 border-transparent focus:bg-white focus:border-blue-500 border rounded-2xl px-5 py-3 text-sm transition outline-none shadow-inner pr-12 resize-none overflow-hidden"
+                            placeholder="Tanyakan sesuatu tentang pertanian padi... (Shift+Enter baris baru)"></textarea>
                         <button type="submit" id="btnSendChat"
-                            class="absolute right-2 top-1.5 bg-blue-600 hover:bg-blue-700 text-white w-9 h-9 rounded-full flex items-center justify-center transition shadow-md">
+                            class="absolute right-2 bottom-2 bg-blue-600 hover:bg-blue-700 text-white w-9 h-9 rounded-full flex items-center justify-center transition shadow-md">
                             <i class="fa-solid fa-paper-plane text-xs"></i>
                         </button>
                     </div>
@@ -307,6 +310,28 @@
             formatted = formatted.replace(/\n/g, '<br>');
             return formatted;
         }
+
+        // ============================================================
+        // TEXTAREA AUTO-RESIZE & SUBMIT HANDLER
+        // ============================================================
+        const chatInput = document.getElementById('chatInput');
+
+        // Auto-resize textarea
+        chatInput.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            if (this.value === '') this.style.height = 'auto'; // Reset if empty
+        });
+
+        // Handle Enter vs Shift+Enter
+        chatInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // Prevent default new line
+                if (this.value.trim() !== "" || attachedFile || attachedUrl) {
+                    document.getElementById('chatForm').requestSubmit();
+                }
+            }
+        });
 
         // ============================================================
         // ATTACHMENT: FILE
@@ -458,7 +483,6 @@
 
             } catch (error) {
                 console.error(error);
-                console.error(error);
                 let msg = "Gagal koneksi ke AI. Coba lagi.";
                 if (error.response && error.response.data) {
                     msg = error.response.data.error || error.response.data.message || msg;
@@ -490,11 +514,13 @@
                 userDisplay += `<div class="mb-1"><span class="inline-flex items-center gap-1 bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded"><i class="fa-solid fa-link"></i> ${escapeHtml(attachedUrl)}</span></div>`;
             }
             if (question) {
-                userDisplay += escapeHtml(question);
+                // Replace newlines with <br> for display
+                userDisplay += escapeHtml(question).replace(/\n/g, '<br>');
             }
             addUserMessage(userDisplay);
 
             input.value = "";
+            input.style.height = 'auto'; // Reset height
             document.getElementById('chatLoading').classList.remove('hidden');
 
             // Build FormData
@@ -522,12 +548,9 @@
                 let msg = error.message || "Koneksi AI gagal.";
 
                 if (error.response) {
-                    // Jika response ada (bukan network error)
                     if (typeof error.response.data === 'string') {
-                        // Response HTML (biasanya 500 error page atau 504 timeout)
                         msg = `Server Error (${error.response.status}): Cek Logs Vercel.`;
                     } else if (error.response.data) {
-                        // Response JSON
                         msg = error.response.data.error || error.response.data.message || msg;
                     }
                 }
@@ -535,7 +558,6 @@
                 addBotMessage("⚠️ " + escapeHtml(msg));
             } finally {
                 document.getElementById('chatLoading').classList.add('hidden');
-                // Clear attachments after send
                 removeAttachedFile();
                 removeAttachedUrl();
             }
@@ -548,7 +570,7 @@
             const history = document.getElementById('chatHistory');
             const bubble = `
                 <div class="flex gap-3 justify-end animate-fade-in-up">
-                    <div class="bg-blue-600 text-white px-4 py-2 rounded-2xl rounded-tr-none shadow-sm text-sm max-w-[85%]">
+                    <div class="bg-blue-600 text-white px-4 py-2 rounded-2xl rounded-tr-none shadow-sm text-sm max-w-[85%] text-left">
                         ${html}
                     </div>
                 </div>`;
@@ -561,9 +583,9 @@
             const bubble = `
                 <div class="flex gap-3 animate-fade-in-up">
                     <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-1">
-             <i class="fa-solid fa-robot text-green-600 text-xs"></i>
+                        <i class="fa-solid fa-robot text-green-600 text-xs"></i>
                     </div>
-                    <div class="bg-white px-4 py-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-700 max-w-[90%] border border-gray-100 leading-relaxed">
+                    <div class="bg-white px-4 py-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-700 max-w-[90%] border border-gray-100 leading-relaxed text-left">
                         ${htmlContent}
                     </div>
                 </div>`;
