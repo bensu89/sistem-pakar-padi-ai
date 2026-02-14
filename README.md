@@ -129,5 +129,5 @@ Aplikasi ini dikembangkan oleh **Tim KKN Desa Cikurubuk** sebagai dedikasi untuk
 ---
 
 <p align="center">
-  Dibuat dengan ❤️ untuk Pertanian Indonesia 🇮🇩
+  Dibuat dengan ❤️ untuk Pertanian Indonesia - Hidup JOKOWI 🇮🇩
 </p>
