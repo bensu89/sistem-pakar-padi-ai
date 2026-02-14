@@ -98,47 +98,28 @@ Aturan:
     {
         $model = $model ?? $this->defaultModel;
 
+        $textContent = ''; // Initialize $textContent
+
         // Fetch URL content
         try {
-            // Gunakan User-Agent browser agar tidak diblokir
-            $response = Http::withHeaders([
-                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            ])->timeout(15)->get($url);
+            // Gunakan Jina Reader untuk mendapatkan konten bersih (Markdown)
+            // Format: https://r.jina.ai/URL
+            $jinaUrl = "https://r.jina.ai/" . $url;
+
+            $response = Http::timeout(30)->get($jinaUrl);
 
             if ($response->failed()) {
-                return "⚠️ Gagal mengakses URL (Status: {$response->status()}). Pastikan URL publik dan bisa diakses.";
+                // Fallback ke metode lama jika Jina gagal
+                return "⚠️ Gagal mengakses URL via Jina Reader (Status: {$response->status()}).";
             }
 
-            $htmlContent = $response->body();
+            $text = $response->body();
 
-            // Parse HTML dengan Symfony DomCrawler
-            // (Pastikan sudah install: composer require symfony/dom-crawler symfony/css-selector)
-            if (class_exists(\Symfony\Component\DomCrawler\Crawler::class)) {
-                $crawler = new \Symfony\Component\DomCrawler\Crawler($htmlContent);
-
-                // Hapus elemen sampah (script, style, nav, footer, iklan, dll)
-                $crawler->filter('script, style, nav, footer, header, aside, iframe, noscript, svg, .ad, .ads, .popup, .login, .signup')->each(function ($node) {
-                    foreach ($node as $n) {
-                        $n->parentNode->removeChild($n);
-                    }
-                });
-
-                // Ambil teks dari body
-                $textContent = $crawler->filter('body')->text();
-            } else {
-                // Fallback jika library belum ada (seharusnya sudah diinstall)
-                $textContent = strip_tags($htmlContent);
-            }
-
-            // Bersihkan whitespace berlebih
-            $textContent = preg_replace('/\s+/', ' ', trim($textContent));
-
-            // Batasi panjang konten (kira-kira 6000 karakter agar muat di context window Llama 3)
-            // Llama 3 punya context window 8k, tapi kita sisakan untuk output.
-            $textContent = mb_substr($textContent, 0, 6000);
+            // Batasi panjang konten
+            $textContent = mb_substr($text, 0, 10000); // Jina output lebih bersih, bisa ambil lebih banyak
 
             if (strlen($textContent) < 50) {
-                return "⚠️ Gagal mengambil konten artikel. Website mungkin menggunakan proteksi JavaScript (SPA/React) atau memblokir bot.";
+                return "⚠️ Gagal mengambil konten artikel. Konten terlalu pendek.";
             }
 
         } catch (\Exception $e) {
