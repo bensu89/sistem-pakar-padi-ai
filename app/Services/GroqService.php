@@ -125,15 +125,19 @@ Aturan:
 
         // 1. COBA JINA READER (Prioritas Utama - Markdown Bersih)
         try {
-            // Timeout dipercepat (10s) agar tidak menunggu lama jika down
+            // Timeout dipercepat (10s)
+            // Tambahkan header X-With-Generated-Alt untuk deskripsi gambar
             $jinaUrl = "https://r.jina.ai/" . $url;
-            $response = Http::timeout(10)->get($jinaUrl);
+            $response = Http::withHeaders([
+                'X-Target-Selector' => 'article, main, .post-content, .entry-content, #content', // Fokus ke konten utama
+                'X-Return-Format' => 'markdown'
+            ])->timeout(10)->get($jinaUrl);
 
             if ($response->successful()) {
                 $text = $response->body();
                 // Validasi panjang konten Jina
-                if (strlen($text) > 50) {
-                    return mb_substr($text, 0, 10000);
+                if (strlen($text) > 100) {
+                    return mb_substr($text, 0, 15000);
                 }
             }
         } catch (\Exception $e) {
@@ -143,7 +147,6 @@ Aturan:
 
         // 2. FALLBACK: DOM CRAWLER (Scraping Lokal)
         try {
-            // Gunakan User-Agent browser asli
             $response = Http::withHeaders([
                 'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             ])->timeout(15)->get($url);
@@ -158,13 +161,19 @@ Aturan:
                 $crawler = new \Symfony\Component\DomCrawler\Crawler($htmlContent);
 
                 // Hapus elemen sampah
-                $crawler->filter('script, style, nav, footer, header, aside, iframe, noscript, svg, .ad, .ads, .popup, .login, .signup, .menu, .sidebar')->each(function ($node) {
+                $crawler->filter('script, style, nav, footer, header, aside, iframe, noscript, svg, .ad, .ads, .popup, .login, .signup, .menu, .sidebar, .widget, .comments')->each(function ($node) {
                     foreach ($node as $n) {
                         $n->parentNode->removeChild($n);
                     }
                 });
 
-                $text = $crawler->filter('body')->text();
+                // Coba ambil dari selektor konten utama dulu
+                $mainContent = $crawler->filter('article, main, .post-content, .entry-content, #content');
+                if ($mainContent->count() > 0) {
+                    $text = $mainContent->text();
+                } else {
+                    $text = $crawler->filter('body')->text();
+                }
             } else {
                 $text = strip_tags($htmlContent);
             }
