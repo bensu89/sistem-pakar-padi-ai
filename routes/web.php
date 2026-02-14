@@ -5,8 +5,13 @@ use App\Http\Controllers\DiagnosisController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ChatController;
 
-// 1. Halaman Utama (Scan & Chat)
-Route::get('/', [DiagnosisController::class, 'index'])->name('home');
+// 1. Landing Page (Halaman Depan)
+Route::get('/', function () {
+    return view('welcome');
+})->name('landing');
+
+// 2. Halaman Utama Aplikasi (Scan & Chat)
+Route::get('/app', [DiagnosisController::class, 'index'])->name('home');
 
 // 2. Proses Analisa (Upload ke AI Groq Vision)
 Route::post('/analyze', [DiagnosisController::class, 'analyze'])->name('analyze');
