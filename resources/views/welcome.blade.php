@@ -98,15 +98,15 @@
             </div>
 
             <h1 class="text-4xl md:text-7xl font-extrabold text-gray-900 tracking-tight mb-6 leading-tight">
-                Jaga Panen Padi <br>
+                Pohaci AI <br>
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-600 via-emerald-500 to-teal-500">
-                    Bebas Penyakit & Hama
+                    Ngariksa Pare, Ngajaga Lemah Cai
                 </span>
             </h1>
 
             <p class="mt-6 max-w-3xl mx-auto text-xl md:text-2xl text-gray-600 mb-10 leading-relaxed font-light">
-                Asisten cerdas untuk petani Indonesia. Cukup <b>foto daun padi</b>, AI kami langsung mendeteksi penyakit
-                dan memberi solusi penyembuhan.
+                Pohaci AI adalah aplikasi sistem pakar berbasis web untuk deteksi penyakit tanaman padi dan konsultasi
+                pertanian.
             </p>
 
             <div class="flex flex-col sm:flex-row justify-center gap-5">
