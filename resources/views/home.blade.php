@@ -559,7 +559,7 @@
             } finally {
                 document.getElementById('chatLoading').classList.add('hidden');
                 removeAttachedFile();
-                removeAttachedUrl();
+                // removeAttachedUrl(); // Jangan hapus URL agar konteks tetap terjaga untuk chat berikutnya
             }
         });
 
