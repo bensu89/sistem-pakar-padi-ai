@@ -103,10 +103,11 @@
                 ✨ TEKNOLOGI PERTANIAN 4.0
             </span>
 
-            <h1 class="text-5xl md:text-7xl font-extrabold text-gray-900 tracking-tight mb-8 leading-tight">
+            <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 tracking-tight mb-6 leading-tight">
                 Pohaci AI, <br>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-500">Ngariksa
-                    Pare, Ngajaga Lemah Cai</span>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-500">
+                    Ngariksa Pare, Ngajaga Lemah Cai
+                </span>
             </h1>
 
             <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-600 mb-12 leading-relaxed">
