@@ -19,6 +19,18 @@ Route::post('/analyze', [DiagnosisController::class, 'analyze'])->name('analyze'
 // 3. Chat AI (Text, File, URL)
 Route::post('/chat', [ChatController::class, 'sendMessage'])->name('chat.send');
 
+// Test Route untuk Verifikasi Scraping (Bisa dihapus nanti)
+Route::get('/test-scrape', function (Illuminate\Http\Request $request) {
+    $url = $request->query('url');
+    if (!$url)
+        return "Silakan berikan parameter ?url=...";
+
+    $groq = new App\Services\GroqService();
+    $text = $groq->scrapeUrl($url);
+
+    return "<pre>" . htmlspecialchars($text) . "</pre>";
+});
+
 // Authentication Routes (Login, Register, Logout, dll)
 Auth::routes();
 
