@@ -122,31 +122,6 @@ Aplikasi ini sudah dikonfigurasi untuk **Vercel** serverless environment.
 
 ---
 
-## ⚠️ Troubleshooting Vercel & Supabase
-
-### 1. Error "CSRF Token Mismatch" (419 Page Expired)
-- **Problem**: Login atau upload gagal di Vercel.
-- **Solusi**: Tambahkan Environment Variables di Vercel Dashboard:
-  - `SESSION_DRIVER`: `cookie`
-  - `SESSION_SECURE_COOKIE`: `true`
-  - `SANCTUM_STATEFUL_DOMAINS`: `nama-app-anda.vercel.app`
-
-### 2. Gambar Upload Tidak Muncul (Broken Image)
-- **Problem**: Gambar hilang setelah beberapa saat.
-- **Solusi**: Pastikan Supabase Storage dikonfigurasi.
-  - Tambahkan `SUPABASE_URL`, `SUPABASE_KEY` (Service Role), `SUPABASE_BUCKET` di Vercel ENV.
-  - Buat bucket `padi-uploads` (Public) di Supabase Storage.
-
-### 3. Login Gagal "Credentials do not match" (Database Kosong)
-- **Solusi**: Buka route `/setup-admin` di browser (`https://.../setup-admin`) untuk membuat user admin default (`admin@padi.com` / `password`).
-
-### 4. PHP 8.4 Deprecation Warnings
-- **Problem**: Muncul warning `Implicitly marking parameter...` di log Vercel.
-- **Solusi**: Aplikasi ini sudah dipatch (Feb 2026) menggunakan `voku/portable-ascii` v2.0.3+ dan `symfony/translation` v6+. Pastikan redeploy dengan "Clear Cache".
-
----
-
-
 ## 🤝 Kontribusi & Credits
 
 Aplikasi ini dikembangkan oleh **Tim KKN Desa Cikurubuk** sebagai dedikasi untuk memajukan teknologi pertanian digital di Indonesia.
@@ -154,5 +129,5 @@ Aplikasi ini dikembangkan oleh **Tim KKN Desa Cikurubuk** sebagai dedikasi untuk
 ---
 
 <p align="center">
-  Dibuat dengan ❤️ untuk Pertanian Indonesia 🇮🇩
+  Dibuat dengan ❤️ untuk Pertanian Indonesia - Hidup JOKOWI 🇮🇩
 </p>
