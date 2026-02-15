@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\GroqService;
+use App\Models\PohaciLog;
+use Illuminate\Support\Facades\Cache;
 
 class ChatController extends Controller
 {
@@ -43,6 +45,14 @@ class ChatController extends Controller
 
                 $answer = $this->groq->chatWithImage($message, $base64, $mimeType);
 
+                $this->saveLog(
+                    $message,
+                    $answer,
+                    'meta-llama/llama-4-scout-17b-16e-instruct',
+                    null,
+                    null
+                );
+
                 return response()->json([
                     'answer' => $answer,
                     'model_used' => 'meta-llama/llama-4-scout-17b-16e-instruct',
@@ -60,6 +70,17 @@ class ChatController extends Controller
 
                 $answer = $this->groq->chatWithUrl($message, $url);
 
+                // Ambil context dari cache yang disimpan di GroqService
+                $scrapedContext = Cache::get('scraped_url_' . md5($url));
+
+                $this->saveLog(
+                    $message,
+                    $answer,
+                    config('services.groq.default_model'),
+                    $url,
+                    $scrapedContext
+                );
+
                 return response()->json([
                     'answer' => $answer,
                     'model_used' => config('services.groq.default_model'),
@@ -74,6 +95,14 @@ class ChatController extends Controller
 
             $answer = $this->groq->chat($message, null, $diseaseContext);
 
+            $this->saveLog(
+                $message,
+                $answer,
+                config('services.groq.default_model'),
+                null,
+                null
+            );
+
             return response()->json([
                 'answer' => $answer,
                 'model_used' => config('services.groq.default_model'),
@@ -84,6 +113,29 @@ class ChatController extends Controller
             return response()->json([
                 'error' => 'Gagal memproses pesan: ' . $e->getMessage(),
             ], 500);
+        }
+    }
+    /**
+     * Helper untuk menyimpan log chat ke database
+     */
+    private function saveLog(string $question, string $answer, string $model, ?string $url = null, ?string $context = null)
+    {
+        try {
+            PohaciLog::create([
+                'user_id' => auth()->id() ?? null, // Ambil ID kalau login, null kalau tamu
+                'user_question' => $question,
+                'target_url' => $url,
+                'raw_context' => $context,
+                'ai_answer' => $answer,
+                'status' => 'success',
+                'meta_data' => [
+                    'model' => $model,
+                    'timestamp' => now()->toDateTimeString(),
+                    'ip_address' => request()->ip()
+                ]
+            ]);
+        } catch (\Exception $e) {
+            \Log::error("Gagal menyimpan Pohaci Log: " . $e->getMessage());
         }
     }
 }
