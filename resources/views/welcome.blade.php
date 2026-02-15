@@ -223,8 +223,8 @@
                         <span class="font-bold text-2xl">Pohaci AI</span>
                     </div>
                     <p class="text-gray-400 leading-relaxed max-w-md">
-                        Platform cerdas untuk membantu petani Indonesia meningkatkan produktivitas dengan deteksi dini
-                        penyakit tanaman.
+                        Pohaci AI adalah aplikasi sistem pakar berbasis web untuk deteksi penyakit tanaman padi dan
+                        konsultasi pertanian.
                     </p>
                 </div>
                 <div>
