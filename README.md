@@ -1,8 +1,3 @@
-Tentu, Pak Beben! README yang baik tidak hanya menjelaskan "apa" aplikasinya, tapi juga "bagaimana" kecanggihannya bekerja di balik layar (terutama fitur *Smart Compression* dan *Safety Gate* yang sudah Bapak buat).
-
-Berikut adalah versi **README.md** yang lebih profesional, terstruktur, dan menonjolkan keunggulan teknis Pohaci AI. Silakan di-copy paste:
-
----
 
 # 🌾 Pohaci AI: Sistem Pakar & Deteksi Penyakit Padi
 
