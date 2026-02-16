@@ -24,6 +24,7 @@ class ChatController extends Controller
         $request->validate([
             'message' => 'nullable|string|max:5000',
             'file' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            'files.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp|max:10240', // Support multiple files
             'url' => 'nullable|url|max:2000',
             'disease_context' => 'nullable|string|max:200',
         ]);
@@ -33,17 +34,30 @@ class ChatController extends Controller
 
         try {
             // --- MODE 1: Chat dengan File (Gambar) ---
-            if ($request->hasFile('file')) {
-                $file = $request->file('file');
-                $base64 = base64_encode(file_get_contents($file->getRealPath()));
-                $mimeType = $file->getMimeType();
+            // Support single 'file' or multiple 'files[]'
+            $files = [];
+            if ($request->hasFile('files')) {
+                $files = $request->file('files');
+            } elseif ($request->hasFile('file')) {
+                $files = [$request->file('file')];
+            }
+
+            if (!empty($files)) {
+                $imagesPayload = [];
+
+                foreach ($files as $file) {
+                    $imagesPayload[] = [
+                        'base64' => base64_encode(file_get_contents($file->getRealPath())),
+                        'mime' => $file->getMimeType(),
+                    ];
+                }
 
                 // Jika tidak ada pesan, berikan default
                 if (empty($message)) {
-                    $message = 'Analisa gambar ini dan jelaskan kondisi tanaman padi yang terlihat.';
+                    $message = 'Analisa gambar-gambar ini dan jelaskan kondisi tanaman padi yang terlihat.';
                 }
 
-                $answer = $this->groq->chatWithImage($message, $base64, $mimeType);
+                $answer = $this->groq->chatWithImage($message, $imagesPayload);
 
                 $this->saveLog(
                     $message,

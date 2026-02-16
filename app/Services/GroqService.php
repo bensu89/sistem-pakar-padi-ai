@@ -60,29 +60,39 @@ Aturan:
     }
 
     /**
-     * Chat dengan gambar (vision model)
+     * Chat dengan gambar (vision model) - Support Multiple Images
+     * @param string $message Pesan user
+     * @param array $images Array of ['base64' => string, 'mime' => string]
+     * @param string|null $model Model ID
      */
-    public function chatWithImage(string $message, string $base64Image, string $mimeType = 'image/jpeg', ?string $model = null): string
+    public function chatWithImage(string $message, array $images, ?string $model = null): string
     {
         // Use configured vision model (default: llama-4-scout)
         $model = $model ?? config('services.groq.vision_model', 'meta-llama/llama-4-scout-17b-16e-instruct');
+
+        $contentPayload = [];
+
+        // 1. Add all images first
+        foreach ($images as $img) {
+            $contentPayload[] = [
+                'type' => 'image_url',
+                'image_url' => [
+                    'url' => "data:{$img['mime']};base64,{$img['base64']}",
+                ],
+            ];
+        }
+
+        // 2. Add text caption
+        $contentPayload[] = [
+            'type' => 'text',
+            'text' => $message ?: 'Analisa gambar-gambar ini dan berikan penjelasan detail tentang kondisi tanaman padi.',
+        ];
 
         $messages = [
             ['role' => 'system', 'content' => $this->systemPrompt],
             [
                 'role' => 'user',
-                'content' => [
-                    [
-                        'type' => 'image_url',
-                        'image_url' => [
-                            'url' => "data:{$mimeType};base64,{$base64Image}",
-                        ],
-                    ],
-                    [
-                        'type' => 'text',
-                        'text' => $message ?: 'Analisa gambar ini dan berikan penjelasan detail tentang kondisi tanaman padi.',
-                    ],
-                ],
+                'content' => $contentPayload,
             ],
         ];
 

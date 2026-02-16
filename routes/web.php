@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DiagnosisController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\PohaciController;
 
 // 1. Landing Page (Halaman Depan)
 Route::get('/', function () {
@@ -17,7 +18,11 @@ Route::get('/app', [DiagnosisController::class, 'index'])->name('home');
 Route::post('/analyze', [DiagnosisController::class, 'analyze'])->name('analyze');
 
 // 3. Chat AI (Text, File, URL)
+// 3. Chat AI (Text, File, URL)
 Route::post('/chat', [ChatController::class, 'sendMessage'])->name('chat.send');
+
+// 3b. Chat Scan (Pohaci Controller - Image Analysis / Scan & Chat)
+Route::post('/chat-scan', [PohaciController::class, 'chat'])->name('pohaci.chat');
 
 // Test Route untuk Verifikasi Scraping (Bisa dihapus nanti)
 Route::get('/test-scrape', function (Illuminate\Http\Request $request) {

@@ -227,17 +227,10 @@
             </div>
 
             <!-- Attachment Preview (File/URL) -->
-            <div id="attachmentPreview" class="hidden border-t bg-gray-50 px-4 py-2 flex items-center gap-3">
-                <!-- File Preview -->
-                <div id="filePreviewBadge"
-                    class="hidden flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-1.5">
-                    <img id="chatFileThumb" src="" class="w-8 h-8 rounded object-cover">
-                    <span id="chatFileName" class="text-xs text-blue-700 font-medium max-w-[120px] truncate"></span>
-                    <button type="button" onclick="removeAttachedFile()"
-                        class="text-blue-400 hover:text-red-500 transition">
-                        <i class="fa-solid fa-xmark text-xs"></i>
-                    </button>
-                </div>
+            <div id="attachmentPreview" class="hidden border-t bg-gray-50 px-4 py-2 flex flex-col gap-2">
+                <!-- File Preview Container -->
+                <div id="filePreviewContainer" class="flex flex-wrap gap-2"></div>
+                
                 <!-- URL Preview -->
                 <div id="urlPreviewBadge"
                     class="hidden flex items-center gap-2 bg-purple-50 border border-purple-200 rounded-lg px-3 py-1.5">
@@ -290,7 +283,7 @@
             <div class="p-4 border-t bg-white">
                 <form id="chatForm" class="flex gap-2 items-center">
                     <!-- Attach File Button -->
-                    <input type="file" id="chatFileInput" class="hidden" accept="image/*">
+                    <input type="file" id="chatFileInput" class="hidden" accept="image/*" multiple>
                     <button type="button" onclick="document.getElementById('chatFileInput').click()"
                         class="w-9 h-9 rounded-full border border-gray-300 bg-gray-50 hover:bg-blue-50 hover:border-blue-400 text-gray-500 hover:text-blue-600 flex items-center justify-center transition tooltip flex-shrink-0"
                         data-tip="Attach Gambar">
@@ -328,7 +321,7 @@
         const URL_CHAT = "{{ route('chat.send') }}";
 
         let currentDisease = "Konsultasi Umum";
-        let attachedFile = null;
+        let attachedFiles = [];
         let attachedUrl = null;
 
         // --- ESCAPE HTML (XSS prevention) ---
@@ -372,37 +365,73 @@
         // ============================================================
         // ATTACHMENT: FILE
         // ============================================================
+        // ============================================================
+        // ATTACHMENT: FILE (MULTIPLE SUPPORT)
+        // ============================================================
         document.getElementById('chatFileInput').addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            if (!file) return;
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
 
-            // Client-side validation for file size (max 4MB)
-            if (file.size > 4 * 1024 * 1024) {
-                alert("Ukuran file terlalu besar! Maksimal 4MB agar tidak gagal upload.");
-                this.value = ''; // Reset input
-                return;
+            // Client-side validation for file size (max 4MB per file)
+            for (let file of files) {
+                if (file.size > 4 * 1024 * 1024) {
+                    alert(`File ${file.name} terlalu besar! Maksimal 4MB.`);
+                    this.value = ''; 
+                    return;
+                }
             }
 
-            attachedFile = file;
-
-            // Show preview badge
-            const reader = new FileReader();
-            reader.onload = function (ev) {
-                document.getElementById('chatFileThumb').src = ev.target.result;
-            };
-            reader.readAsDataURL(file);
-            document.getElementById('chatFileName').textContent = file.name;
-            document.getElementById('filePreviewBadge').classList.remove('hidden');
-            document.getElementById('attachmentPreview').classList.remove('hidden');
+            // Append new files
+            attachedFiles = [...attachedFiles, ...files];
+            renderFilePreviews();
+            
+            // Allow selecting same file again
+            this.value = ''; 
         });
 
-        function removeAttachedFile() {
-            attachedFile = null;
-            document.getElementById('chatFileInput').value = '';
-            document.getElementById('filePreviewBadge').classList.add('hidden');
-            if (!attachedUrl) {
-                document.getElementById('attachmentPreview').classList.add('hidden');
+        function renderFilePreviews() {
+            const container = document.getElementById('filePreviewContainer');
+            container.innerHTML = ''; // Clear current
+
+            if (attachedFiles.length > 0) {
+                document.getElementById('attachmentPreview').classList.remove('hidden');
+                
+                attachedFiles.forEach((file, index) => {
+                     const reader = new FileReader();
+                     const div = document.createElement('div');
+                     div.className = 'flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-1.5 mb-1';
+                     
+                     div.innerHTML = `
+                        <img src="" class="w-8 h-8 rounded object-cover file-thumb-${index}">
+                        <span class="text-xs text-blue-700 font-medium max-w-[120px] truncate">${escapeHtml(file.name)}</span>
+                        <button type="button" onclick="removeAttachedFile(${index})"
+                            class="text-blue-400 hover:text-red-500 transition">
+                            <i class="fa-solid fa-xmark text-xs"></i>
+                        </button>
+                     `;
+                     
+                     container.appendChild(div);
+
+                     reader.onload = function (ev) {
+                         div.querySelector(`.file-thumb-${index}`).src = ev.target.result;
+                     };
+                     reader.readAsDataURL(file);
+                });
+            } else {
+                 if (!attachedUrl) {
+                    document.getElementById('attachmentPreview').classList.add('hidden');
+                 }
             }
+        }
+
+        function removeAttachedFile(index) {
+            attachedFiles.splice(index, 1);
+            renderFilePreviews();
+        }
+
+        function resetAttachedFiles() {
+            attachedFiles = [];
+            renderFilePreviews();
         }
 
         // ============================================================
@@ -436,7 +465,7 @@
         function removeAttachedUrl() {
             attachedUrl = null;
             document.getElementById('urlPreviewBadge').classList.add('hidden');
-            if (!attachedFile) {
+            if (attachedFiles.length === 0) {
                 document.getElementById('attachmentPreview').classList.add('hidden');
             }
         }
@@ -470,8 +499,8 @@
                         🔗 <b>Paste URL</b> untuk analisa konten halaman web
                     </div>
                 </div>`;
-            removeAttachedFile();
             removeAttachedUrl();
+            resetAttachedFiles();
         }
 
         // ============================================================
@@ -559,12 +588,16 @@
             const question = input.value.trim();
 
             // Minimal harus ada salah satu: text, file, atau URL
-            if (!question && !attachedFile && !attachedUrl) return;
+            if (!question && attachedFiles.length === 0 && !attachedUrl) return;
 
             // Tampilkan pesan user
             let userDisplay = '';
-            if (attachedFile) {
-                userDisplay += `<div class="mb-1"><span class="inline-flex items-center gap-1 bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded"><i class="fa-solid fa-image"></i> ${escapeHtml(attachedFile.name)}</span></div>`;
+            if (attachedFiles.length > 0) {
+                 userDisplay += `<div class="mb-1 flex flex-wrap gap-1">`;
+                 attachedFiles.forEach(file => {
+                    userDisplay += `<span class="inline-flex items-center gap-1 bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded"><i class="fa-solid fa-image"></i> ${escapeHtml(file.name)}</span>`;
+                 });
+                 userDisplay += `</div>`;
             }
             if (attachedUrl) {
                 userDisplay += `<div class="mb-1"><span class="inline-flex items-center gap-1 bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded"><i class="fa-solid fa-link"></i> ${escapeHtml(attachedUrl)}</span></div>`;
@@ -584,8 +617,10 @@
             if (question) formData.append('message', question);
             formData.append('disease_context', currentDisease);
 
-            if (attachedFile) {
-                formData.append('file', attachedFile);
+            if (attachedFiles.length > 0) {
+                attachedFiles.forEach(file => {
+                    formData.append('files[]', file);
+                });
             }
             if (attachedUrl) {
                 formData.append('url', attachedUrl);
@@ -619,7 +654,7 @@
                 addBotMessage("⚠️ " + escapeHtml(msg));
             } finally {
                 document.getElementById('chatLoading').classList.add('hidden');
-                removeAttachedFile();
+                resetAttachedFiles();
                 // removeAttachedUrl(); // Jangan hapus URL agar konteks tetap terjaga untuk chat berikutnya
             }
         });
