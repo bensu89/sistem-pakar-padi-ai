@@ -372,10 +372,10 @@
             const files = Array.from(e.target.files);
             if (files.length === 0) return;
 
-            // Client-side validation for file size (max 4MB per file)
+            // Client-side validation for file size (max 20MB per file)
             for (let file of files) {
-                if (file.size > 4 * 1024 * 1024) {
-                    alert(`File ${file.name} terlalu besar! Maksimal 4MB.`);
+                if (file.size > 20 * 1024 * 1024) {
+                    alert(`File ${file.name} terlalu besar! Maksimal 20MB.`);
                     this.value = ''; 
                     return;
                 }
@@ -532,9 +532,9 @@
                 return;
             }
 
-            // Client-side validation for file size (max 4MB for Vercel/safe limit)
-            if (file.size > 4 * 1024 * 1024) {
-                alert("Ukuran file terlalu besar! Maksimal 4MB.");
+            // Client-side validation for file size (max 20MB)
+            if (file.size > 20 * 1024 * 1024) {
+                alert("Ukuran file terlalu besar! Maksimal 20MB.");
                 return;
             }
 
