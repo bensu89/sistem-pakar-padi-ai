@@ -135,4 +135,4 @@ Dikembangkan oleh: **Beben Sutara (bensu89)**
 
 ---
 
-*Dibuat dengan ❤️ untuk kemajuan petani Indonesia.* 🇮🇩
+Dibuat dengan ❤️ untuk kemajuan petani Indonesia. Hidup Jokowi! 🇮🇩
