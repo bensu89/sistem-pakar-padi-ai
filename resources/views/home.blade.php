@@ -9,6 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <style>
         @keyframes fadeInUp {
             from {
@@ -320,6 +321,24 @@
         const URL_UPLOAD = "{{ route('analyze') }}";
         const URL_CHAT = "{{ route('chat.send') }}";
 
+        // --- IMAGE COMPRESSION CONFIG ---
+        async function compressImage(file) {
+            const options = {
+                maxSizeMB: 1, // Max 1MB allowed by Vercel is 4.5MB, so this is safe
+                maxWidthOrHeight: 1920,
+                useWebWorker: true
+            };
+            try {
+                if (file.size <= 1024 * 1024) return file; // Skip if already small
+                const compressedFile = await imageCompression(file, options);
+                console.log(`Compressed: ${(file.size/1024/1024).toFixed(2)}MB -> ${(compressedFile.size/1024/1024).toFixed(2)}MB`);
+                return compressedFile;
+            } catch (error) {
+                console.error("Compression failed:", error);
+                return file; // Fallback to original
+            }
+        }
+
         let currentDisease = "Konsultasi Umum";
         let attachedFiles = [];
         let attachedUrl = null;
@@ -522,6 +541,9 @@
         // ============================================================
         // 1. UPLOAD & DIAGNOSA (Panel Kiri → Groq Vision)
         // ============================================================
+        // ============================================================
+        // 1. UPLOAD & DIAGNOSA (Panel Kiri → Groq Vision)
+        // ============================================================
         document.getElementById('uploadForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             const fileInput = document.getElementById('imageInput');
@@ -540,13 +562,16 @@
 
             const btn = document.getElementById('btnDiagnosa');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengompres & Upload...'; // Changed text
             btn.disabled = true;
 
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-
             try {
+                // COMPRESS IMAGE BEFORE UPLOAD
+                const compressedFile = await compressImage(file);
+                
+                const formData = new FormData();
+                formData.append('file', compressedFile); // Send compressed file
+
                 const response = await axios.post(URL_UPLOAD, formData);
                 const data = response.data;
 
@@ -582,6 +607,9 @@
         // ============================================================
         // 2. CHATBOT (Text / File / URL → Laravel → Groq)
         // ============================================================
+        // ============================================================
+        // 2. CHATBOT (Text / File / URL → Laravel → Groq)
+        // ============================================================
         document.getElementById('chatForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             const input = document.getElementById('chatInput');
@@ -612,16 +640,32 @@
             input.style.height = 'auto'; // Reset height
             document.getElementById('chatLoading').classList.remove('hidden');
 
+            const btn = document.getElementById('btnSendChat');
+            btn.disabled = true; // Disable send button while compressing
+
             // Build FormData
             const formData = new FormData();
             if (question) formData.append('message', question);
             formData.append('disease_context', currentDisease);
 
+            // COMPRESS ATTACHED FILES
             if (attachedFiles.length > 0) {
-                attachedFiles.forEach(file => {
-                    formData.append('files[]', file);
-                });
+                try {
+                    const compressionPromises = attachedFiles.map(file => compressImage(file));
+                    const compressedFiles = await Promise.all(compressionPromises);
+                    
+                    compressedFiles.forEach(file => {
+                        formData.append('files[]', file);
+                    });
+                } catch (err) {
+                    console.error("Error compressing chat files:", err);
+                    // Fallback to original files if compression fails
+                    attachedFiles.forEach(file => {
+                        formData.append('files[]', file);
+                    });
+                }
             }
+            
             if (attachedUrl) {
                 formData.append('url', attachedUrl);
             }
@@ -654,6 +698,7 @@
                 addBotMessage("⚠️ " + escapeHtml(msg));
             } finally {
                 document.getElementById('chatLoading').classList.add('hidden');
+                btn.disabled = false;
                 resetAttachedFiles();
                 // removeAttachedUrl(); // Jangan hapus URL agar konteks tetap terjaga untuk chat berikutnya
             }
