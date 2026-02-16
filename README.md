@@ -1,133 +1,93 @@
-<p align="center">
-  <img src="https://img.shields.io/badge/Laravel-8.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel">
-  <img src="https://img.shields.io/badge/Groq_AI-Cloud_API-F55036?style=for-the-badge&logo=groq&logoColor=white" alt="Groq">
-  <img src="https://img.shields.io/badge/Tailwind_CSS-3.x-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind">
-  <img src="https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel">
-  <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase">
-</p>
+# Pohaci AI: Sistem Pakar Padi & Deteksi Penyakit 🌾🤖
 
-# 🌾 Pohaci AI — Ngariksa Pare, Ngajaga Lemah Cai
+**Pohaci AI** adalah aplikasi berbasis web yang dirancang untuk membantu petani dalam mendeteksi penyakit pada tanaman padi secara dini menggunakan teknologi Kecerdasan Buatan (AI). Aplikasi ini menyediakan fitur diagnosa melalui analisis citra daun padi dan asisten chatbot interaktif.
 
-**Pohaci AI** adalah aplikasi sistem pakar berbasis web untuk **deteksi penyakit tanaman padi** dan **konsultasi pertanian**. Aplikasi ini mengintegrasikan **Laravel** sebagai backend dengan **Groq Cloud API** untuk kecerdasan buatan yang cepat dan akurat.
+## 🚀 Fitur Utama
 
-> *"Pohaci"* diambil dari Dewi Sri (Nyi Pohaci) dalam mitologi Sunda — dewi padi dan kesuburan.
+- **Diagnosa Penyakit Padi**: Unggah foto daun padi untuk mendapatkan analisa penyakit secara instan menggunakan AI.
+- **AI Chatbot (Llama-3 Vision)**: Konsultasi interaktif seputar pertanian dengan kemampuan analisa gambar dan teks.
+- **Kompresi Gambar Otomatis**: Fitur optimasi sisi klien untuk memastikan upload cepat dan hemat bandwidth (mengatasi limit serverless).
+- **Manajemen Pengguna**: Mendukung peran Admin, Teknisi, dan Pelapor untuk pengelolaan data lapangan.
+- **Dashboard Admin**: Tokenisasi API, manajemen laporan, dan monitoring sistem.
 
----
+## 🛠️ Teknologi yang Digunakan
 
-## ✨ Fitur Unggulan
+- **Backend**: Laravel 10 (PHP 8.0)
+- **Frontend**: Blade Templates, Tailwind CSS, JavaScript (Vanilla + Axios)
+- **Database**: MySQL / MariaDB
+- **Storage**: Supabase Storage (S3 Protocol)
+- **AI Engine**: Groq API (Llama-3 Vision Model)
+- **Libraries**:
+    - `intervention/image` (Manipulasi Gambar)
+    - `browser-image-compression` (Kompresi Client-side)
+    - `league/flysystem-aws-s3-v3` (Storage Driver)
 
-### 🔬 Diagnosa Penyakit (Vision AI)
-- **Upload Foto Daun**: Analisa otomatis menggunakan model Vision AI (Llama 3.2 Vision / Llama 4 Scout).
-- **Hasil Instan**: Menampilkan nama penyakit, tingkat kepercayaan (confidence), dan solusi penanganan.
-- **Riwayat Diagnosa**: Data tersimpan untuk monitoring dan pelaporan.
+## 📦 Instalasi & Konfigurasi
 
-### 💬 Chatbot AI Pertanian (Smart Assistant)
-- **Konsultasi Real-time**: Tanya jawab seputar pertanian padi.
-- **Multi-Modal**:
-  - **Text**: Pertanyaan umum.
-  - **Gambar (📎 Attach)**: Analisa foto hama/penyakit langsung di chat.
-  - **URL (🔗 Link)**: Analisa konten artikel/berita pertanian dari link eksternal.
-- **Dynamic Model**: Otomatis memilih model bahasa yang tepat (Llama 3.3 70B untuk chat kompleks, Mixtral untuk kecepatan).
+Ikuti langkah-langkah berikut untuk menjalankan proyek di komputer lokal Anda:
 
-### 📱 Antarmuka Ramah Petani (Farmer-Friendly UI)
-- **Desain Mobile-First**: Tombol besar, kontras tinggi, mudah digunakan di HP saat di sawah.
-- **Aksi Cepat (Quick Actions)**: Chip pertanyaan instan ("Hama Wereng", "Pupuk") tanpa perlu mengetik panjang.
-- **Responsif & Ringan**: Tampilan bersih tanpa scrollbar mengganggu, optimal untuk sinyal desa.
+### 1. Clone Repository
+```bash
+git clone https://github.com/bensu89/sistem-pakar-padi-ai.git
+cd sistem-pakar-padi-ai
+```
 
-### 🚜 Dashboard Admin Terintegrasi
-- Statistik penggunaan AI real-time.
-- Manajemen data diagnosa & riwayat chat.
-- Export laporan (Excel/CSV) untuk dinas/kelompok tani.
+### 2. Install Dependencies
+Pastikan Anda memiliki PHP 8.0 dan Composer terinstal.
+```bash
+composer install
+npm install && npm run dev
+```
 
----
+### 3. Konfigurasi Environment (.env)
+Salin file `.env.example` menjadi `.env` dan sesuaikan konfigurasinya:
+```bash
+cp .env.example .env
+```
 
-## 🏗️ Arsitektur & Teknologi
+**Konfigurasi Database:**
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=pohaci_db
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-| Komponen | Teknologi | Keterangan |
-|----------|-----------|------------|
-| **Framework** | Laravel 8.83 | Backend PHP robust & stabil (PHP 8.4 Support) |
-| **Database** | PostgreSQL (Supabase) | Cloud database scalable |
-| **AI Engine** | Groq API | Inference super cepat (Llama 3.3 70B & Vision) |
-| **Frontend** | Blade + Tailwind CSS | UI responsif & mobile-first |
-| **Hosting** | Vercel (Serverless) | Deployment otomatis & performa tinggi |
+**Konfigurasi Supabase Storage (Wajib untuk Upload Gambar):**
+```env
+SUPABASE_ACCESS_KEY_ID=your_access_key
+SUPABASE_SECRET_ACCESS_KEY=your_secret_key
+SUPABASE_REGION=ap-southeast-1
+SUPABASE_BUCKET=padi-uploads
+SUPABASE_ENDPOINT=https://<project_ref>.supabase.co/storage/v1/s3
+SUPABASE_URL=https://<project_ref>.supabase.co/storage/v1/object/public/padi-uploads
+```
 
----
+**Konfigurasi Groq AI:**
+```env
+GROQ_API_KEY=gsk_your_groq_api_key
+```
 
-## 🚀 Panduan Instalasi (Lokal)
+### 4. Generate Key & Migrasi Database
+```bash
+php artisan key:generate
+php artisan migrate
+```
 
-1.  **Clone Repository**
-    ```bash
-    git clone https://github.com/bensu89/sistem-pakar-padi-ai.git
-    cd sistem-pakar-padi-ai
-    ```
+### 5. Jalankan Aplikasi
+```bash
+php artisan serve
+```
+Akses aplikasi di `http://127.0.0.1:8000`.
 
-2.  **Install Dependensi**
-    ```bash
-    composer install
-    npm install && npm run dev
-    ```
+## 📝 Catatan Penting
+- **Limit Upload**: Aplikasi ini memiliki validasi sisi klien 20MB, namun secara otomatis mengompres gambar menjadi di bawah 1MB sebelum dikirim ke server untuk kompatibilitas dengan serverless environment (seperti Vercel).
+- **PHP Version**: Pastikan menggunakan PHP 8.0 sesuai dengan `composer.json`.
 
-3.  **Konfigurasi Environment**
-    Salin `.env.example` ke `.env` dan sesuaikan:
-    ```env
-    APP_URL=http://localhost:8000
-    
-    # Database (Bisa pakai MySQL lokal atau Supabase)
-    DB_CONNECTION=mysql 
-    DB_HOST=127.0.0.1
-    DB_PORT=3306
-    DB_DATABASE=padi_db
-    DB_USERNAME=root
-    DB_PASSWORD=
-
-    # Groq API (Dapatkan di console.groq.com)
-    GROQ_API_KEY=gsk_...
-    GROQ_DEFAULT_MODEL=llama-3.1-8b-instant
-    GROQ_VISION_MODEL=llama-3.2-11b-vision-preview
-    ```
-
-4.  **Generate Key & Migrasi**
-    ```bash
-    php artisan key:generate
-    php artisan migrate
-    php artisan storage:link
-    ```
-
-5.  **Jalankan Server**
-    ```bash
-    php artisan serve
-    ```
-    Buka `http://localhost:8000`
+## 📄 Lisensi
+[MIT License](LICENSE)
 
 ---
-
-## ☁️ Panduan Deployment (Vercel)
-
-Aplikasi ini sudah dikonfigurasi untuk **Vercel** serverless environment.
-
-1.  **Push ke GitHub** pastikan kode terbaru ada di repo.
-2.  **Import di Vercel Dashboard**.
-3.  **Set Environment Variables** di Vercel:
-    - `APP_KEY`: (Sama seperti lokal)
-    - `APP_DEBUG`: `false` (untuk production)
-    - `APP_URL`: `https://namaproject.vercel.app`
-    - `GROQ_API_KEY`: API Key Groq Anda
-    - `DB_CONNECTION`: `pgsql`
-    - `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`: Detail koneksi Supabase Anda.
-    - `GROQ_DEFAULT_MODEL`: `llama-3.1-8b-instant` (Rekomendasi)
-    - `GROQ_VISION_MODEL`: `llama-3.2-11b-vision-preview`
-4.  **Redeploy** jika ada perubahan kode.
-
-> **Catatan:** Untuk Vercel, pastikan menggunakan `vercel-php@0.9.0` (sudah diatur di `vercel.json`).
-
----
-
-## 🤝 Kontribusi & Credits
-
-Aplikasi ini dikembangkan oleh **Tim KKN Desa Cikurubuk** sebagai dedikasi untuk memajukan teknologi pertanian digital di Indonesia.
-
----
-
-<p align="center">
-  Dibuat dengan ❤️ untuk Pertanian Indonesia - Hidup JOKOWI 🇮🇩
-</p>
+*Dikembangkan oleh Tim KKN Desa Cikurubuk untuk Pertanian Indonesia yang Lebih Maju.* 🌱
