@@ -375,6 +375,14 @@
         document.getElementById('chatFileInput').addEventListener('change', function (e) {
             const file = e.target.files[0];
             if (!file) return;
+
+            // Client-side validation for file size (max 4MB)
+            if (file.size > 4 * 1024 * 1024) {
+                alert("Ukuran file terlalu besar! Maksimal 4MB agar tidak gagal upload.");
+                this.value = ''; // Reset input
+                return;
+            }
+
             attachedFile = file;
 
             // Show preview badge
@@ -488,9 +496,16 @@
         document.getElementById('uploadForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             const fileInput = document.getElementById('imageInput');
+            const file = fileInput.files[0];
 
-            if (!fileInput.files[0]) {
+            if (!file) {
                 alert("Pilih foto dulu!");
+                return;
+            }
+
+            // Client-side validation for file size (max 4MB for Vercel/safe limit)
+            if (file.size > 4 * 1024 * 1024) {
+                alert("Ukuran file terlalu besar! Maksimal 4MB.");
                 return;
             }
 
@@ -521,7 +536,12 @@
                 console.error(error);
                 let msg = "Gagal koneksi ke AI. Coba lagi.";
                 if (error.response && error.response.data) {
-                    msg = error.response.data.error || error.response.data.message || msg;
+                    let errMsg = error.response.data.error || error.response.data.message;
+                    if (typeof errMsg === 'object') {
+                        msg = errMsg.message || JSON.stringify(errMsg);
+                    } else if (errMsg) {
+                        msg = errMsg;
+                    }
                 }
                 alert(msg);
             } finally {
@@ -587,7 +607,12 @@
                     if (typeof error.response.data === 'string') {
                         msg = `Server Error (${error.response.status}): Cek Logs Vercel.`;
                     } else if (error.response.data) {
-                        msg = error.response.data.error || error.response.data.message || msg;
+                        let errMsg = error.response.data.error || error.response.data.message;
+                        if (typeof errMsg === 'object') {
+                            msg = errMsg.message || JSON.stringify(errMsg);
+                        } else if (errMsg) {
+                            msg = errMsg;
+                        }
                     }
                 }
 
