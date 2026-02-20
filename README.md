@@ -9,15 +9,14 @@
 
 ## 🚀 Fitur Unggulan
 
-### 1. 🤖 Diagnosa Penyakit Berbasis AI (Llama-3 Vision)
-
+### 1. 🤖 Diagnosa Penyakit Berbasis AI (Gemini & Llama-3 Vision)
 * **Analisa Visual:** Unggah foto daun padi, dan AI akan mendeteksi penyakit (seperti Blas, Hawar Daun, Tungro) beserta tingkat keparahannya.
-* **Anti-Halusinasi (*Safety Gate*):** Sistem dilengkapi validasi ketat. AI akan menolak menjawab jika objek bukan tanaman padi atau jika informasi tidak tersedia di basis pengetahuan.
+* **Auto-Fallback System:** Menggunakan Google Gemini sebagai AI utama (`gemini-2.5-flash` / `gemini-2.5-pro`). Jika Limit/Quota habis, sistem otomatis berpindah (*fallback*) ke Groq API (`llama-3.3-70b-versatile`) memastikan aplikasi tetap berjalan 24/7 tanpa downtime.
+* **Anti-Halusinasi (*Safety Gate*):** Sistem dilengkapi validasi ketat. AI akan menolak menjawab jika objek bukan tanaman padi.
 
 ### 2. 💬 Asisten Chatbot Pertanian Cerdas
-
 * **Konteks Percakapan:** Chatbot mengingat riwayat pertanyaan sebelumnya untuk konsultasi yang mengalir natural.
-* **Deep Reading:** Mampu membaca dan mengekstrak informasi detail (nama latin, bahan aktif obat) dari artikel referensi yang diberikan.
+* **Deep Reading:** Mampu membaca dan mengekstrak informasi detail (nama latin, bahan aktif obat) dari artikel referensi atau URL yang diberikan pengguna.
 
 ### 3. ⚡ Smart Compression (Hemat Kuota & Server)
 
@@ -28,10 +27,9 @@
 
 * **Dukungan Resolusi Tinggi:** Menerima foto kamera HP modern (hingga 20MB) namun tetap ringan diproses server.
 
-### 4. 📊 Data Lake & Dataset Collector
-
-* **Logging Otomatis:** Setiap interaksi (Tanya-Jawab & Gambar) tersimpan otomatis di database sebagai aset dataset.
-* **Supabase Storage:** Penyimpanan gambar bukti fisik penyakit yang terintegrasi dengan log konsultasi.
+### 4. 📊 Data Lake & Dual-Bucket Architecture
+* **Logging Otomatis:** Setiap interaksi tersimpan otomatis di database sebagai aset dataset.
+* **Smart Routing Storage:** Terintegrasi dengan Supabase REST API untuk memisahkan gambar valid (bucket `diagnosa`) dan gambar cacat/bukan padi (bucket `salah-upload`) guna menjaga kebersihan dataset.
 
 ---
 
@@ -53,9 +51,9 @@
 * **Library:** `browser-image-compression` (Untuk optimasi sisi klien)
 
 ### AI Engine
-
-* **Provider:** Groq API
-* **Model:** Llama-3.2-11b-vision-preview (Multimodal) / Llama-3.1-8b-instant (Text)
+* **Architecure:** Interface-based Dual AI Provider (`AIServiceInterface`)
+* **Primary:** Google Gemini API (`gemini-2.5-flash` / `gemini-2.5-pro`)
+* **Fallback:** Groq API (`llama-3.3-70b-versatile` / `llama-4-scout-17b`)
 
 ---
 
@@ -83,20 +81,24 @@ npm install && npm run build
 3. **Konfigurasi Environment**
 Duplikasi file `.env.example` menjadi `.env` dan sesuaikan kuncinya:
 ```ini
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_DATABASE=pohaci_db
+DB_CONNECTION=pgsql
+DB_HOST=aws-1-ap-southeast-1.pooler.supabase.com
+DB_PORT=6543
+DB_DATABASE=postgres
+DB_USERNAME=postgres.your_project_ref
+DB_PASSWORD=your_db_password
 
-# Konfigurasi AI Groq
-GROQ_API_KEY=gsk_your_key_here
+# Konfigurasi AI
+AI_PROVIDER=gemini
+GEMINI_API_KEY=your_gemini_key
+GEMINI_DEFAULT_MODEL=gemini-2.5-flash
+GROQ_API_KEY=your_groq_key
 
-# Konfigurasi Supabase Storage
-AWS_ACCESS_KEY_ID=your_supabase_s3_access_key
-AWS_SECRET_ACCESS_KEY=your_supabase_s3_secret_key
-AWS_DEFAULT_REGION=ap-southeast-1
-AWS_BUCKET=your_bucket_name
-AWS_ENDPOINT=https://your-project.supabase.co/storage/v1/s3
-
+# Konfigurasi Supabase Storage (REST)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your_service_role_key
+SUPABASE_BUCKET=diagnosa
+SUPABASE_FAILED_BUCKET=salah-upload
 ```
 
 
