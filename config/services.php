@@ -3,16 +3,16 @@
 return [
 
     /*
-    |--------------------------------------------------------------------------
-    | Third Party Services
-    |--------------------------------------------------------------------------
-    |
-    | This file is for storing the credentials for third party services such
-    | as Mailgun, Postmark, AWS and more. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional file to locate the various service credentials.
-    |
-    */
+     |--------------------------------------------------------------------------
+     | Third Party Services
+     |--------------------------------------------------------------------------
+     |
+     | This file is for storing the credentials for third party services such
+     | as Mailgun, Postmark, AWS and more. This file provides the de facto
+     | location for this type of information, allowing packages to have
+     | a conventional file to locate the various service credentials.
+     |
+     */
 
     'mailgun' => [
         'domain' => env('MAILGUN_DOMAIN'),
@@ -30,11 +30,21 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'ai' => [
+        'provider' => env('AI_PROVIDER', 'groq'), // 'groq' atau 'gemini'
+    ],
+
     'groq' => [
         'api_key' => env('GROQ_API_KEY'),
         'default_model' => env('GROQ_DEFAULT_MODEL', 'llama-3.3-70b-versatile'),
         'vision_model' => env('GROQ_VISION_MODEL', 'meta-llama/llama-4-scout-17b-16e-instruct'),
         'base_url' => 'https://api.groq.com/openai/v1',
+    ],
+
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'default_model' => env('GEMINI_DEFAULT_MODEL', 'gemini-2.5-flash'),
+        'vision_model' => env('GEMINI_VISION_MODEL', 'gemini-2.5-pro'),
     ],
 
 ];

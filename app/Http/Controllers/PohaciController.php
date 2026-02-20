@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\GroqService;
+use App\Services\AIServiceInterface;
 use App\Models\PohaciLog;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image; // Intervention Image V2
@@ -11,11 +11,11 @@ use Illuminate\Support\Facades\Log;
 
 class PohaciController extends Controller
 {
-    protected GroqService $groq;
+    protected AIServiceInterface $ai;
 
-    public function __construct(GroqService $groq)
+    public function __construct(AIServiceInterface $ai)
     {
-        $this->groq = $groq;
+        $this->ai = $ai;
     }
 
     /**
@@ -48,14 +48,14 @@ class PohaciController extends Controller
             $path = 'padi-uploads/' . $filename;
 
             // Upload stream terkompresi ke disk 'supabase'
-            Storage::disk('supabase')->put($path, (string) $image, 'public');
+            Storage::disk('supabase')->put($path, (string)$image, 'public');
 
             // Ambil URL Publik
             $publicUrl = Storage::disk('supabase')->url($path);
 
             // 4. AI PROCESSING (GROQ)
             // Konversi image terkompresi ke base64 untuk dikirim ke LLM
-            $base64Image = base64_encode((string) $image);
+            $base64Image = base64_encode((string)$image);
 
             // Panggil Service Groq (Llama-3 Vision)
             // Kita bungkus dalam array untuk support kompatibilitas method chatWithImage yang baru
@@ -66,7 +66,7 @@ class PohaciController extends Controller
                 ]
             ];
 
-            $aiResponse = $this->groq->chatWithImage($userMessage, $imagesPayload);
+            $aiResponse = $this->ai->chatWithImage($userMessage, $imagesPayload);
 
             // 5. LOGGING KE DATABASE
             PohaciLog::create([
@@ -78,7 +78,7 @@ class PohaciController extends Controller
                 'status' => 'success',
                 'meta_data' => [
                     'original_size' => $file->getSize(),
-                    'compressed_size' => strlen((string) $image),
+                    'compressed_size' => strlen((string)$image),
                     'model' => 'llama-3-vision',
                     'timestamp' => now()->toDateTimeString()
                 ]
@@ -91,12 +91,13 @@ class PohaciController extends Controller
                     'response' => $aiResponse,
                     'scan_meta' => [
                         'compressed' => true,
-                        'size_kb' => round(strlen((string) $image) / 1024, 2)
+                        'size_kb' => round(strlen((string)$image) / 1024, 2)
                     ]
                 ]
             ]);
 
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             Log::error("Pohaci Error: " . $e->getMessage());
             return response()->json([
                 'success' => false,

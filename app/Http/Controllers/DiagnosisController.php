@@ -6,16 +6,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Diagnosis;
 use App\Models\FailedUpload;
-use App\Services\GroqService;
+use App\Services\AIServiceInterface;
 
 class DiagnosisController extends Controller
 {
-    protected GroqService $groq;
+    protected AIServiceInterface $ai;
     protected \App\Services\SupabaseStorageService $supabase;
 
-    public function __construct(GroqService $groq, \App\Services\SupabaseStorageService $supabase)
+    public function __construct(AIServiceInterface $ai, \App\Services\SupabaseStorageService $supabase)
     {
-        $this->groq = $groq;
+        $this->ai = $ai;
         $this->supabase = $supabase;
     }
 
@@ -48,32 +48,43 @@ class DiagnosisController extends Controller
                 $publicUrl = 'storage/' . $path;
             }
 
-            // 3. Kirim ke Groq Vision untuk diagnosa
-            $result = $this->groq->diagnosisImage($base64Image, $mimeType);
+            // 3. Kirim ke AI Vision untuk diagnosa
+            $result = $this->ai->diagnosisImage($base64Image, $mimeType);
 
             // --- LOGIKA PENENTUAN (FILTERING) ---
 
             // KASUS A: Bukan Daun Padi
             if (isset($result['disease_name']) && $result['disease_name'] == 'Bukan Daun Padi') {
-                FailedUpload::create([
-                    'image_path' => $publicUrl,
-                    'reason' => 'Terdeteksi Objek Non-Padi',
-                ]);
+                try {
+                    FailedUpload::create([
+                        'image_path' => $publicUrl,
+                        'reason' => 'Terdeteksi Objek Non-Padi',
+                    ]);
+                }
+                catch (\Exception $dbEx) {
+                    \Illuminate\Support\Facades\Log::warning('DB save failed (FailedUpload): ' . $dbEx->getMessage());
+                }
 
                 return response()->json($result);
             }
 
             // KASUS B: Penyakit Padi (Valid)
-            Diagnosis::create([
-                'image_path' => $publicUrl,
-                'disease_name' => $result['disease_name'],
-                'confidence' => $result['confidence'],
-                'solution' => $result['solution'],
-            ]);
+            try {
+                Diagnosis::create([
+                    'image_path' => $publicUrl,
+                    'disease_name' => $result['disease_name'],
+                    'confidence' => $result['confidence'],
+                    'solution' => $result['solution'],
+                ]);
+            }
+            catch (\Exception $dbEx) {
+                \Illuminate\Support\Facades\Log::warning('DB save failed (Diagnosis): ' . $dbEx->getMessage());
+            }
 
             return response()->json($result);
 
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }

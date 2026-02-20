@@ -3,17 +3,17 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\GroqService;
+use App\Services\AIServiceInterface;
 use App\Models\PohaciLog;
 use Illuminate\Support\Facades\Cache;
 
 class ChatController extends Controller
 {
-    protected GroqService $groq;
+    protected AIServiceInterface $ai;
 
-    public function __construct(GroqService $groq)
+    public function __construct(AIServiceInterface $ai)
     {
-        $this->groq = $groq;
+        $this->ai = $ai;
     }
 
     /**
@@ -38,7 +38,8 @@ class ChatController extends Controller
             $files = [];
             if ($request->hasFile('files')) {
                 $files = $request->file('files');
-            } elseif ($request->hasFile('file')) {
+            }
+            elseif ($request->hasFile('file')) {
                 $files = [$request->file('file')];
             }
 
@@ -57,19 +58,22 @@ class ChatController extends Controller
                     $message = 'Analisa gambar-gambar ini dan jelaskan kondisi tanaman padi yang terlihat.';
                 }
 
-                $answer = $this->groq->chatWithImage($message, $imagesPayload);
+                $answer = $this->ai->chatWithImage($message, $imagesPayload);
 
+                $visionModel = $this->ai instanceof \App\Services\FallbackAIService
+                    ? $this->ai->getActiveModelName('vision')
+                    : $this->getActiveModelName('vision');
                 $this->saveLog(
                     $message,
                     $answer,
-                    'meta-llama/llama-4-scout-17b-16e-instruct',
+                    $visionModel,
                     null,
                     null
                 );
 
                 return response()->json([
                     'answer' => $answer,
-                    'model_used' => 'meta-llama/llama-4-scout-17b-16e-instruct',
+                    'model_used' => $visionModel,
                     'type' => 'vision',
                 ]);
             }
@@ -82,22 +86,25 @@ class ChatController extends Controller
                     $message = 'Rangkum dan analisa konten dari URL ini dalam konteks pertanian padi.';
                 }
 
-                $answer = $this->groq->chatWithUrl($message, $url);
+                $answer = $this->ai->chatWithUrl($message, $url);
 
                 // Ambil context dari cache yang disimpan di GroqService
                 $scrapedContext = Cache::get('scraped_url_' . md5($url));
 
+                $defaultModel = $this->ai instanceof \App\Services\FallbackAIService
+                    ? $this->ai->getActiveModelName('default')
+                    : $this->getActiveModelName('default');
                 $this->saveLog(
                     $message,
                     $answer,
-                    config('services.groq.default_model'),
+                    $defaultModel,
                     $url,
                     $scrapedContext
                 );
 
                 return response()->json([
                     'answer' => $answer,
-                    'model_used' => config('services.groq.default_model'),
+                    'model_used' => $defaultModel,
                     'type' => 'url',
                 ]);
             }
@@ -107,23 +114,27 @@ class ChatController extends Controller
                 return response()->json(['error' => 'Pesan tidak boleh kosong.'], 422);
             }
 
-            $answer = $this->groq->chat($message, null, $diseaseContext);
+            $answer = $this->ai->chat($message, null, $diseaseContext);
 
+            $defaultModel = $this->ai instanceof \App\Services\FallbackAIService
+                ? $this->ai->getActiveModelName('default')
+                : $this->getActiveModelName('default');
             $this->saveLog(
                 $message,
                 $answer,
-                config('services.groq.default_model'),
+                $defaultModel,
                 null,
                 null
             );
 
             return response()->json([
                 'answer' => $answer,
-                'model_used' => config('services.groq.default_model'),
+                'model_used' => $defaultModel,
                 'type' => 'text',
             ]);
 
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             return response()->json([
                 'error' => 'Gagal memproses pesan: ' . $e->getMessage(),
             ], 500);
@@ -148,8 +159,27 @@ class ChatController extends Controller
                     'ip_address' => request()->ip()
                 ]
             ]);
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             \Log::error("Gagal menyimpan Pohaci Log: " . $e->getMessage());
         }
+    }
+
+    /**
+     * Helper untuk mendapatkan nama model AI yang aktif
+     */
+    private function getActiveModelName(string $type = 'default'): string
+    {
+        $provider = config('services.ai.provider', 'groq');
+
+        if ($provider === 'gemini') {
+            return $type === 'vision'
+                ? config('services.gemini.vision_model', 'gemini-2.5-pro')
+                : config('services.gemini.default_model', 'gemini-2.5-flash');
+        }
+
+        return $type === 'vision'
+            ? config('services.groq.vision_model', 'meta-llama/llama-4-scout-17b-16e-instruct')
+            : config('services.groq.default_model', 'llama-3.3-70b-versatile');
     }
 }

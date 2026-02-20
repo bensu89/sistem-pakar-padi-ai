@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 
-class GroqService
+class GroqService implements AIServiceInterface
 {
     protected string $apiKey;
     protected string $baseUrl;
