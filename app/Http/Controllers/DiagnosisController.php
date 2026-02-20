@@ -36,29 +36,44 @@ class DiagnosisController extends Controller
             $mimeType = $image->getMimeType();
             $base64Image = base64_encode(file_get_contents($image->getRealPath()));
 
-            // 2. Upload ke Supabase Storage (Cloud)
-            $publicUrl = $this->supabase->upload($image, 'diagnosa');
-
-            // Fallback jika upload gagal (misal config belum set), pakai local temporary link 
-            // (Agar app tidak crash, meski gambar broken nanti)
-            if (!$publicUrl) {
-                // Simpan lokal sementara
-                $filename = 'temp_' . time() . '.' . $image->getClientOriginalExtension();
-                $path = $image->storeAs('uploads', $filename, 'public');
-                $publicUrl = 'storage/' . $path;
-            }
-
-            // 3. Kirim ke AI Vision untuk diagnosa
+            // 1. Kirim ke AI Vision untuk diagnosa DULU
             $result = $this->ai->diagnosisImage($base64Image, $mimeType);
 
             // --- LOGIKA PENENTUAN (FILTERING) ---
+            $isInvalidOrError = (isset($result['disease_name']) && $result['disease_name'] == 'Bukan Daun Padi') ||
+                (isset($result['disease_name']) && $result['disease_name'] == 'Tidak Diketahui' && $result['confidence'] == 0);
 
-            // KASUS A: Bukan Daun Padi
-            if (isset($result['disease_name']) && $result['disease_name'] == 'Bukan Daun Padi') {
+            // 2. Upload ke Supabase Storage (Cloud) dengan Bucket yang sesuai
+            $failedBucket = env('SUPABASE_FAILED_BUCKET', 'salah-upload');
+
+            if ($isInvalidOrError) {
+                // Upload ke bucket salah-upload
+                $publicUrl = $this->supabase->upload($image, 'salah', $failedBucket);
+            }
+            else {
+                // Upload ke bucket utama (diagnosa)
+                $publicUrl = $this->supabase->upload($image, 'diagnosa', null);
+            }
+
+            // Fallback jika upload gagal (misal config belum set), pakai local temporary link 
+            if (!$publicUrl) {
+                // Simpan lokal sementara
+                $folder = $isInvalidOrError ? 'salah-upload' : 'uploads';
+                $filename = 'temp_' . time() . '.' . $image->getClientOriginalExtension();
+                $path = $image->storeAs($folder, $filename, 'public');
+                $publicUrl = 'storage/' . $path;
+            }
+
+            if ($isInvalidOrError) {
+                $reason = 'Terdeteksi Objek Non-Padi';
+                if ($result['disease_name'] == 'Tidak Diketahui') {
+                    $reason = 'AI Error: ' . $result['solution'];
+                }
+
                 try {
                     FailedUpload::create([
                         'image_path' => $publicUrl,
-                        'reason' => 'Terdeteksi Objek Non-Padi',
+                        'reason' => $reason,
                     ]);
                 }
                 catch (\Exception $dbEx) {

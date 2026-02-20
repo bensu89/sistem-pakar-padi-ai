@@ -25,13 +25,14 @@ class SupabaseStorageService
      * @param  string  $folder
      * @return string|null Public URL of the uploaded file
      */
-    public function upload(UploadedFile $file, $folder = 'diagnosa')
+    public function upload(UploadedFile $file, $folder = 'diagnosa', $customBucket = null)
     {
+        $targetBucket = $customBucket ?? $this->bucket;
         $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
         $path = $folder . '/' . $filename;
 
         // Endpoint: POST {supabase_url}/storage/v1/object/{bucket}/{path}
-        $endpoint = $this->url . '/storage/v1/object/' . $this->bucket . '/' . $path;
+        $endpoint = $this->url . '/storage/v1/object/' . $targetBucket . '/' . $path;
 
         try {
             // Read file content
@@ -42,20 +43,21 @@ class SupabaseStorageService
                 'Content-Type' => $file->getMimeType(),
                 'x-upsert' => 'false',
             ])->send('POST', $endpoint, [
-                        'body' => $content
-                    ]);
+                'body' => $content
+            ]);
 
             if ($response->successful()) {
                 // Return Public URL
                 // Format: {supabase_url}/storage/v1/object/public/{bucket}/{path}
-                return $this->url . '/storage/v1/object/public/' . $this->bucket . '/' . $path;
+                return $this->url . '/storage/v1/object/public/' . $targetBucket . '/' . $path;
             }
 
             // Log error if needed
             // \Log::error('Supabase Upload Failed: ' . $response->body());
             return null;
 
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             // \Log::error('Supabase Upload Error: ' . $e->getMessage());
             return null;
         }
