@@ -71,14 +71,53 @@
                 </div>
 
                 <!-- Mobile Menu Button -->
-                <div class="md:hidden flex item-center">
-                    <a href="{{ route('home') }}" class="bg-green-600 text-white p-2 rounded-lg">
+                <div class="md:hidden flex items-center gap-2">
+                    <button id="mobile-menu-toggle"
+                        class="p-2 rounded-lg hover:bg-gray-100 transition"
+                        aria-label="Toggle menu">
+                        <i class="fa-solid fa-bars text-gray-900 text-xl"></i>
+                    </button>
+                    <a href="{{ route('home') }}" class="bg-green-600 text-white p-2 rounded-lg hover:bg-green-700 transition">
                         <i class="fa-solid fa-play"></i>
                     </a>
                 </div>
             </div>
         </div>
     </nav>
+
+    <!-- Mobile Menu Dropdown -->
+    <div id="mobile-menu"
+        class="hidden md:hidden fixed top-20 left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-40">
+        <div class="px-4 py-4 space-y-2 flex flex-col">
+            <a href="#fitur"
+                class="px-4 py-2 rounded-lg text-gray-700 hover:text-green-600 hover:bg-gray-100 font-medium transition">
+                <i class="fa-solid fa-star mr-2"></i>Fitur
+            </a>
+            <a href="#cara-kerja"
+                class="px-4 py-2 rounded-lg text-gray-700 hover:text-green-600 hover:bg-gray-100 font-medium transition">
+                <i class="fa-solid fa-book mr-2"></i>Cara Kerja
+            </a>
+            <a href="#faq"
+                class="px-4 py-2 rounded-lg text-gray-700 hover:text-green-600 hover:bg-gray-100 font-medium transition">
+                <i class="fa-solid fa-question-circle mr-2"></i>FAQ
+            </a>
+
+            <!-- Auth Links -->
+            <div class="pt-4 border-t border-gray-200 space-y-2">
+                @auth
+                    <a href="{{ route('admin.index') }}"
+                        class="px-4 py-2 rounded-lg text-gray-700 hover:text-green-600 hover:bg-gray-100 font-medium transition">
+                        <i class="fa-solid fa-gauge-high mr-2"></i>Dashboard
+                    </a>
+                @else
+                    <a href="{{ route('login') }}"
+                        class="px-4 py-2 rounded-lg text-gray-700 hover:text-green-600 hover:bg-gray-100 font-medium transition">
+                        <i class="fa-solid fa-lock mr-2"></i>Masuk Admin
+                    </a>
+                @endauth
+            </div>
+        </div>
+    </div>
 
     <!-- Hero Section -->
     <section class="relative pt-24 pb-12 lg:pt-40 lg:pb-32 overflow-hidden bg-gradient-to-b from-green-50 to-white">
@@ -202,6 +241,135 @@
         </div>
     </section>
 
+    <!-- Cara Kerja Section -->
+    <section id="cara-kerja" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Cara Kerja Pohaci AI</h2>
+                <p class="text-gray-500 max-w-2xl mx-auto">Proses mudah dan cepat untuk mendapatkan diagnosa akurat tentang kesehatan tanaman padi Anda.</p>
+            </div>
+
+            <div class="grid md:grid-cols-4 gap-6">
+                <!-- Step 1 -->
+                <div class="relative flex flex-col items-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg mb-4">
+                        1
+                    </div>
+                    <h3 class="font-bold text-gray-900 text-lg text-center mb-2">Upload Foto Daun</h3>
+                    <p class="text-gray-600 text-sm text-center">Ambil atau unggah foto daun padi yang terlihat sakit dari perangkat Anda.</p>
+                    @if (!$loop->last ?? true)
+                        <div class="hidden md:block absolute top-8 left-[calc(100%)] w-full h-1 bg-gradient-to-r from-green-500 to-emerald-600" style="width: calc(200% + 24px); margin-left: 12px;"></div>
+                    @endif
+                </div>
+
+                <!-- Step 2 -->
+                <div class="relative flex flex-col items-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg mb-4">
+                        2
+                    </div>
+                    <h3 class="font-bold text-gray-900 text-lg text-center mb-2">AI Analisis</h3>
+                    <p class="text-gray-600 text-sm text-center">Model Vision AI kami menganalisis gambar dalam hitungan detik untuk identifikasi akurat.</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="relative flex flex-col items-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg mb-4">
+                        3
+                    </div>
+                    <h3 class="font-bold text-gray-900 text-lg text-center mb-2">Terima Hasil</h3>
+                    <p class="text-gray-600 text-sm text-center">Dapatkan nama penyakit, tingkat akurasi, dan solusi penanganan yang detail.</p>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="relative flex flex-col items-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg mb-4">
+                        4
+                    </div>
+                    <h3 class="font-bold text-gray-900 text-lg text-center mb-2">Konsultasi Lanjutan</h3>
+                    <p class="text-gray-600 text-sm text-center">Tanya lebih lanjut ke chatbot AI untuk mendapatkan rekomendasi penanganan optimal.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-20 bg-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Pertanyaan Umum (FAQ)</h2>
+                <p class="text-gray-500">Temukan jawaban atas pertanyaan yang sering diajukan tentang Pohaci AI.</p>
+            </div>
+
+            <div class="space-y-4">
+                <!-- FAQ Item 1 -->
+                <div class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+                    <button onclick="toggleFaq(this)" class="w-full px-6 py-4 text-left font-semibold text-gray-900 hover:bg-gray-100 transition flex justify-between items-center">
+                        <span><i class="fa-solid fa-chart-pie text-green-600 mr-3"></i>Berapa akurasi deteksi penyakit Pohaci AI?</span>
+                        <i class="fa-solid fa-chevron-down transition-transform duration-300"></i>
+                    </button>
+                    <div class="hidden px-6 pb-4 text-gray-600">
+                        Pohaci AI menggunakan model Vision AI terbaru (Llama 3.2 Vision) yang dapat mencapai akurasi 90%+ dalam mendeteksi penyakit tanaman padi. Namun, akurasi dapat bervariasi tergantung kualitas foto dan kondisi pencahayaan.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+                    <button onclick="toggleFaq(this)" class="w-full px-6 py-4 text-left font-semibold text-gray-900 hover:bg-gray-100 transition flex justify-between items-center">
+                        <span><i class="fa-solid fa-coins text-green-600 mr-3"></i>Apakah aplikasi Pohaci AI gratis?</span>
+                        <i class="fa-solid fa-chevron-down transition-transform duration-300"></i>
+                    </button>
+                    <div class="hidden px-6 pb-4 text-gray-600">
+                        Ya! Pohaci AI sepenuhnya gratis untuk digunakan. Tidak ada biaya tersembunyi, langganan, atau iklan. Kami mengembangkan aplikasi ini sebagai dedikasi untuk memajukan teknologi pertanian digital di Indonesia.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+                    <button onclick="toggleFaq(this)" class="w-full px-6 py-4 text-left font-semibold text-gray-900 hover:bg-gray-100 transition flex justify-between items-center">
+                        <span><i class="fa-solid fa-comments text-green-600 mr-3"></i>Bagaimana cara menggunakan chatbot AI?</span>
+                        <i class="fa-solid fa-chevron-down transition-transform duration-300"></i>
+                    </button>
+                    <div class="hidden px-6 pb-4 text-gray-600">
+                        Chatbot AI kami tersedia di panel kanan aplikasi. Anda bisa mengetik pertanyaan seputar budidaya padi, pupuk, hama, dan penyakit. Anda juga bisa menambahkan gambar atau URL artikel untuk analisa yang lebih mendalam. Tekan Enter untuk mengirim pesan atau Shift+Enter untuk baris baru.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 4 -->
+                <div class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+                    <button onclick="toggleFaq(this)" class="w-full px-6 py-4 text-left font-semibold text-gray-900 hover:bg-gray-100 transition flex justify-between items-center">
+                        <span><i class="fa-solid fa-leaf text-green-600 mr-3"></i>Apa saja penyakit padi yang bisa dideteksi?</span>
+                        <i class="fa-solid fa-chevron-down transition-transform duration-300"></i>
+                    </button>
+                    <div class="hidden px-6 pb-4 text-gray-600">
+                        Pohaci AI dapat mendeteksi berbagai penyakit tanaman padi seperti Blas (Blast), Kresek, Hawar Daun Bakteri, Busuk Batang, Tungro, dan penyakit lainnya. Selain itu, aplikasi juga bisa mendeteksi serangan hama seperti Wereng Coklat dan Penggerek Batang.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 5 -->
+                <div class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+                    <button onclick="toggleFaq(this)" class="w-full px-6 py-4 text-left font-semibold text-gray-900 hover:bg-gray-100 transition flex justify-between items-center">
+                        <span><i class="fa-solid fa-lock text-green-600 mr-3"></i>Apakah foto saya aman dan privasi terjamin?</span>
+                        <i class="fa-solid fa-chevron-down transition-transform duration-300"></i>
+                    </button>
+                    <div class="hidden px-6 pb-4 text-gray-600">
+                        Ya, data Anda aman. Foto yang Anda unggah diproses melalui server secure dan hanya digunakan untuk analisis. Kami tidak menyimpan foto Anda lebih lama dari diperlukan untuk proses diagnosa. Privasi pengguna adalah prioritas kami.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 6 -->
+                <div class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+                    <button onclick="toggleFaq(this)" class="w-full px-6 py-4 text-left font-semibold text-gray-900 hover:bg-gray-100 transition flex justify-between items-center">
+                        <span><i class="fa-solid fa-question-circle text-green-600 mr-3"></i>Bagaimana jika hasil diagnosa kurang akurat?</span>
+                        <i class="fa-solid fa-chevron-down transition-transform duration-300"></i>
+                    </button>
+                    <div class="hidden px-6 pb-4 text-gray-600">
+                        Jika Anda meragukan hasil diagnosa, kami sarankan untuk: 1) Coba upload foto dengan sudut berbeda, pencahayaan lebih terang, atau fokus pada bagian daun yang terserang. 2) Konsultasikan dengan ahli pertanian lokal Anda. 3) Gunakan chatbot untuk mendiskusikan gejala lebih detail dengan AI pakar kami.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="bg-gray-900 text-white py-12 border-t border-gray-800">
         <div
@@ -215,15 +383,52 @@
             </div>
 
             <div class="flex gap-6">
-                <a href="#" class="text-gray-400 hover:text-white transition"><i
+                <a href="https://github.com/bensu89/sistem-pakar-padi-ai" target="_blank" class="text-gray-400 hover:text-white transition"><i
                         class="fa-brands fa-github text-xl"></i></a>
-                <a href="#" class="text-gray-400 hover:text-white transition"><i
+                <a href="https://instagram.com" target="_blank" class="text-gray-400 hover:text-white transition"><i
                         class="fa-brands fa-instagram text-xl"></i></a>
             </div>
         </div>
     </footer>
 
-    <style>
+    <script>
+        // FAQ Accordion Toggle
+        function toggleFaq(button) {
+            const container = button.parentElement;
+            const content = container.querySelector('div:last-child');
+            const icon = button.querySelector('i:last-child');
+
+            content.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        }
+
+        // Mobile Menu Toggle
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Close menu when a link is clicked
+            document.querySelectorAll('#mobile-menu a').forEach(link => {
+                link.addEventListener('click', function() {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('#mobile-menu-toggle') &&
+                    !event.target.closest('#mobile-menu')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+
+    <style>>
         .animate-blob {
             animation: blob 7s infinite;
         }

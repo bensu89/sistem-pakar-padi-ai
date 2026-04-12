@@ -86,89 +86,11 @@
 <body
     class="bg-gray-100 min-h-screen md:h-screen w-screen md:overflow-hidden flex items-center justify-center p-4 relative">
 
-    <!-- Admin Login / Dashboard Button (Top Right) -->
-    <div class="absolute top-4 right-4 z-50">
-        @auth
-            <a href="{{ route('admin.index') }}"
-                class="bg-white text-gray-700 hover:text-green-600 px-4 py-2 rounded-lg shadow-sm font-bold text-sm flex items-center gap-2 transition hover:shadow-md border border-gray-200">
-                <i class="fa-solid fa-gauge-high"></i> Dashboard
-            </a>
-        @else
-            <a href="{{ route('login') }}"
-                class="bg-white/80 backdrop-blur text-gray-500 hover:text-blue-600 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition hover:bg-white hover:shadow-sm border border-transparent hover:border-blue-100">
-                <i class="fa-solid fa-lock"></i> Admin Login
-            </a>
-        @endauth
-    </div>
-
     <div
-        class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-auto md:h-[90vh] flex flex-col md:flex-row overflow-hidden relative">
+        class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-auto md:h-[90vh] flex flex-col overflow-hidden relative">
 
-        <!-- ========== PANEL KIRI: DIAGNOSA FOTO ========== -->
-        <div
-            class="w-full md:w-4/12 border-r border-gray-200 bg-white flex flex-col h-auto md:h-full relative z-20 shadow-md">
-
-            <div class="p-5 border-b flex justify-between items-center bg-gray-50">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-leaf text-green-600 text-xl"></i>
-                    <h2 class="font-bold text-gray-700">Diagnosa Daun Padi</h2>
-                </div>
-                <button type="button" onclick="resetApp()"
-                    class="text-gray-400 hover:text-red-500 transition text-sm flex items-center gap-1 border border-gray-300 px-2 py-1 rounded bg-white hover:border-red-400"
-                    title="Mulai Ulang">
-                    <i class="fa-solid fa-arrows-rotate"></i> Reset
-                </button>
-            </div>
-
-            <div class="flex-1 overflow-y-auto p-5 space-y-4">
-                <form id="uploadForm" class="space-y-3">
-                    <div class="border-2 border-dashed border-green-300 rounded-2xl bg-green-50/50 hover:bg-green-100/50 transition cursor-pointer relative h-64 flex flex-col justify-center items-center group overflow-hidden shadow-inner"
-                        id="dropZone">
-                        <input type="file" id="imageInput" name="image"
-                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" accept="image/*"
-                            required>
-                        <div id="previewContainer" class="hidden w-full h-full absolute inset-0 bg-white">
-                            <img id="imagePreview" src="" class="w-full h-full object-contain p-2">
-                        </div>
-                        <div id="uploadPrompt" class="group-hover:scale-105 transition duration-300 text-center p-6">
-                            <div class="bg-white p-5 rounded-full shadow-md inline-block mb-4 animate-bounce">
-                                <i class="fa-solid fa-camera text-4xl text-green-600"></i>
-                            </div>
-                            <p class="text-gray-700 font-bold text-lg">Ambil / Upload Foto</p>
-                            <p class="text-gray-500 text-sm mt-1">Pastikan bagian daun terlihat jelas</p>
-                        </div>
-                    </div>
-                    <button type="submit" id="btnDiagnosa"
-                        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl transition shadow-lg hover:shadow-green-500/30 flex justify-center items-center gap-3 active:scale-95 text-lg">
-                        <i class="fa-solid fa-magnifying-glass-chart"></i> Mulai Cek Penyakit
-                    </button>
-                </form>
-
-                <div id="resultSection"
-                    class="hidden bg-green-50 rounded-xl border border-green-200 p-4 animate-fade-in-up">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Terdeteksi:</p>
-                            <h3 id="resDisease" class="text-lg font-bold text-gray-800 capitalize leading-tight">Nama
-                                Penyakit</h3>
-                        </div>
-                        <span id="resConfidenceText"
-                            class="text-xs bg-green-600 text-white px-2 py-1 rounded font-bold shadow-sm">0%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2">
-                        <div id="resConfidenceBar" class="bg-green-500 h-1.5 rounded-full transition-all duration-1000"
-                            style="width: 0%"></div>
-                    </div>
-                </div>
-
-                <div class="text-xs text-gray-400 text-center mt-4">
-                    <p>Aplikasi ini Dikembangkan Tim KKN Desa Cikurubuk</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- ========== PANEL KANAN: CHATBOT ========== -->
-        <div class="w-full md:w-8/12 bg-white flex flex-col h-[80vh] md:h-full relative z-10">
+        <!-- ========== PANEL CHATBOT ========== -->
+        <div class="w-full bg-white flex flex-col h-[85vh] md:h-full relative z-10">
 
             <!-- Header Chat -->
             <div class="p-4 border-b flex items-center justify-between bg-white z-10 shadow-sm">
@@ -189,12 +111,73 @@
                         class="text-xs text-gray-500 border px-3 py-1 rounded-full bg-gray-50 max-w-[150px] truncate flex items-center gap-1 hidden md:flex">
                         Topik: <span id="chatContextDisease" class="font-bold text-gray-700">Umum</span>
                     </div>
-                    <!-- Reset Chat -->
-                    <button type="button" onclick="resetChat()"
+                    @auth
+                        <a href="{{ route('admin.index') }}"
+                            class="bg-white text-gray-700 hover:text-green-600 px-3 py-1.5 rounded-lg shadow-sm font-bold text-xs flex items-center gap-2 transition hover:shadow-md border border-gray-200">
+                            <i class="fa-solid fa-gauge-high"></i> Dashboard
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}"
+                            class="bg-white/80 backdrop-blur text-gray-500 hover:text-blue-600 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition hover:bg-white hover:shadow-sm border border-transparent hover:border-blue-100">
+                            <i class="fa-solid fa-lock"></i> Admin Login
+                        </a>
+                    @endauth
+                    <button type="button" onclick="resetApp()"
                         class="text-gray-400 hover:text-red-500 transition text-xs flex items-center gap-1 border border-gray-300 px-2 py-1.5 rounded-full bg-white hover:border-red-400 hover:bg-red-50 tooltip"
-                        data-tip="Reset Chat">
-                        <i class="fa-solid fa-broom"></i>
+                        data-tip="Reset Semua">
+                        <i class="fa-solid fa-arrows-rotate"></i>
                     </button>
+                </div>
+            </div>
+
+            <!-- ========== DIAGNOSA FOTO DI DALAM CHAT ========== -->
+            <div class="p-4 border-b bg-gradient-to-br from-green-50 via-white to-emerald-50">
+                <div class="flex items-start justify-between gap-4 mb-3">
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.2em] text-green-600 font-semibold">Diagnosa Foto</p>
+                        <h2 class="text-lg font-bold text-gray-800 mt-1">Ambil / Upload Foto langsung dari chat</h2>
+                        <p class="text-sm text-gray-500">Pilih dari kamera atau galeri, lalu cek penyakitnya di sini.</p>
+                    </div>
+                </div>
+
+                <form id="uploadForm" class="space-y-3">
+                    <label for="imageInput"
+                        class="border-2 border-dashed border-green-300 rounded-2xl bg-white/90 hover:bg-green-50 transition cursor-pointer relative min-h-[12rem] flex flex-col justify-center items-center group overflow-hidden shadow-inner">
+                        <input type="file" id="imageInput" name="image" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            accept="image/*" capture="environment" required>
+                        <div id="previewContainer" class="hidden w-full h-full absolute inset-0 bg-white">
+                            <img id="imagePreview" src="" class="w-full h-full object-contain p-2">
+                        </div>
+                        <div id="uploadPrompt" class="group-hover:scale-105 transition duration-300 text-center p-6">
+                            <div class="bg-white p-5 rounded-full shadow-md inline-block mb-4">
+                                <i class="fa-solid fa-camera text-4xl text-green-600"></i>
+                            </div>
+                            <p class="text-gray-700 font-bold text-lg">Ambil / Upload Foto</p>
+                            <p class="text-gray-500 text-sm mt-1">Pastikan bagian daun terlihat jelas</p>
+                        </div>
+                    </label>
+                    <button type="submit" id="btnDiagnosa"
+                        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-4 rounded-2xl transition shadow-lg hover:shadow-green-500/30 flex justify-center items-center gap-3 active:scale-95 text-lg">
+                        <i class="fa-solid fa-magnifying-glass-chart"></i>
+                        <span>Mulai Cek Penyakit</span>
+                    </button>
+                </form>
+
+                <div id="resultSection"
+                    class="hidden mt-3 bg-green-50 rounded-xl border border-green-200 p-4 animate-fade-in-up">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Terdeteksi:</p>
+                            <h3 id="resDisease" class="text-lg font-bold text-gray-800 capitalize leading-tight">Nama
+                                Penyakit</h3>
+                        </div>
+                        <span id="resConfidenceText"
+                            class="text-xs bg-green-600 text-white px-2 py-1 rounded font-bold shadow-sm">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+                        <div id="resConfidenceBar" class="bg-green-500 h-1.5 rounded-full transition-all duration-1000"
+                            style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
 
@@ -207,9 +190,8 @@
                     <div
                         class="bg-white px-4 py-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-700 max-w-[90%] border border-gray-100 leading-relaxed">
                         Halo! Saya <b>Pohaci AI</b>, asisten pakar padi Anda. 🌱<br><br>
-                        📸 <b>Upload Foto</b> di panel kiri untuk diagnosa penyakit<br>
+                        📸 <b>Upload Foto</b> di kartu atas untuk diagnosa penyakit<br>
                         💬 <b>Ketik Pertanyaan</b> di bawah untuk konsultasi<br>
-                        📎 <b>Attach File</b> untuk analisa gambar langsung di chat<br>
                         🔗 <b>Paste URL</b> untuk analisa konten halaman web
                     </div>
                 </div>
@@ -289,13 +271,7 @@
             <!-- Chat Input -->
             <div class="p-4 border-t bg-white">
                 <form id="chatForm" class="flex gap-2 items-center">
-                    <!-- Attach File Button -->
                     <input type="file" id="chatFileInput" class="hidden" accept="image/*">
-                    <button type="button" onclick="document.getElementById('chatFileInput').click()"
-                        class="w-9 h-9 rounded-full border border-gray-300 bg-gray-50 hover:bg-blue-50 hover:border-blue-400 text-gray-500 hover:text-blue-600 flex items-center justify-center transition tooltip flex-shrink-0"
-                        data-tip="Attach Gambar">
-                        <i class="fa-solid fa-paperclip text-sm"></i>
-                    </button>
                     <!-- Add URL Button -->
                     <button type="button" onclick="toggleUrlInput()"
                         class="w-9 h-9 rounded-full border border-gray-300 bg-gray-50 hover:bg-purple-50 hover:border-purple-400 text-gray-500 hover:text-purple-600 flex items-center justify-center transition tooltip flex-shrink-0"
@@ -345,6 +321,19 @@
             formatted = formatted.replace(/^\* /gm, '• ');
             formatted = formatted.replace(/\n/g, '<br>');
             return formatted;
+        }
+
+        function renderDiagnosisResult(data) {
+            document.getElementById('resultSection').classList.remove('hidden');
+            document.getElementById('resDisease').innerText = data.disease_name;
+            document.getElementById('resConfidenceBar').style.width = data.confidence + "%";
+            document.getElementById('resConfidenceText').innerText = data.confidence + "%";
+
+            currentDisease = data.disease_name;
+            document.getElementById('chatContextDisease').innerText = currentDisease;
+
+            const analisaRapi = formatText(data.solution);
+            addBotMessage(`💡 <b>Hasil Diagnosa (${data.confidence}%):</b><br><br>${analisaRapi}`);
         }
 
         // ============================================================
@@ -436,38 +425,43 @@
         // ============================================================
         // RESET FUNCTIONS
         // ============================================================
-        function resetApp() {
-            document.getElementById('uploadForm').reset();
-            document.getElementById('imagePreview').src = "";
-            document.getElementById('previewContainer').classList.add('hidden');
-            document.getElementById('uploadPrompt').classList.remove('hidden');
-            document.getElementById('resultSection').classList.add('hidden');
-            currentDisease = "Konsultasi Umum";
-            document.getElementById('chatContextDisease').innerText = currentDisease;
-            addBotMessage("🔄 <i>Mode diagnosa di-reset. Kembali ke konsultasi umum.</i>");
-        }
-
-        function resetChat() {
-            const history = document.getElementById('chatHistory');
-            history.innerHTML = `
-                <div class="flex gap-3 animate-fade-in-up">
-                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-1">
-                        <i class="fa-solid fa-robot text-green-600 text-xs"></i>
-                    </div>
-                    <div class="bg-white px-4 py-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-700 max-w-[90%] border border-gray-100 leading-relaxed">
-                        Halo! Saya <b>Pohaci AI</b>, asisten pakar padi Anda. 🌱<br><br>
-                        📸 <b>Upload Foto</b> di panel kiri untuk diagnosa penyakit<br>
-                        💬 <b>Ketik Pertanyaan</b> di bawah untuk konsultasi<br>
-                        📎 <b>Attach File</b> untuk analisa gambar langsung di chat<br>
-                        🔗 <b>Paste URL</b> untuk analisa konten halaman web
-                    </div>
-                </div>`;
-            removeAttachedFile();
-            removeAttachedUrl();
+        async function resetApp() {
+            const confirmed = await showConfirmDialog(
+                'Reset Semua?',
+                'Semua diagnosa, attachment, dan riwayat chat akan dihapus. Lanjutkan?',
+                'Reset',
+                'Batal'
+            );
+            if (confirmed) {
+                document.getElementById('uploadForm').reset();
+                document.getElementById('imagePreview').src = "";
+                document.getElementById('previewContainer').classList.add('hidden');
+                document.getElementById('uploadPrompt').classList.remove('hidden');
+                document.getElementById('resultSection').classList.add('hidden');
+                currentDisease = "Konsultasi Umum";
+                document.getElementById('chatContextDisease').innerText = currentDisease;
+                const history = document.getElementById('chatHistory');
+                history.innerHTML = `
+                    <div class="flex gap-3 animate-fade-in-up">
+                        <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-1">
+                            <i class="fa-solid fa-robot text-green-600 text-xs"></i>
+                        </div>
+                        <div class="bg-white px-4 py-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-700 max-w-[90%] border border-gray-100 leading-relaxed">
+                            Halo! Saya <b>Pohaci AI</b>, asisten pakar padi Anda. 🌱<br><br>
+                            📸 <b>Upload Foto</b> di kartu atas untuk diagnosa penyakit<br>
+                            💬 <b>Ketik Pertanyaan</b> di bawah untuk konsultasi<br>
+                            🔗 <b>Paste URL</b> untuk analisa konten halaman web
+                        </div>
+                    </div>`;
+                removeAttachedFile();
+                removeAttachedUrl();
+                addBotMessage("🔄 <i>Semua data sudah di-reset. Silakan mulai ulang.</i>");
+                showToast('success', 'Semua data direset');
+            }
         }
 
         // ============================================================
-        // PREVIEW IMAGE (Left Panel)
+        // PREVIEW IMAGE (Chat Photo Card)
         // ============================================================
         document.getElementById('imageInput').addEventListener('change', function (e) {
             const file = e.target.files[0];
@@ -483,14 +477,14 @@
         });
 
         // ============================================================
-        // 1. UPLOAD & DIAGNOSA (Panel Kiri → Groq Vision)
+        // 1. UPLOAD & DIAGNOSA (Chat Photo Card → Groq Vision)
         // ============================================================
         document.getElementById('uploadForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             const fileInput = document.getElementById('imageInput');
 
             if (!fileInput.files[0]) {
-                alert("Pilih foto dulu!");
+                showToast('warning', 'Pilih foto dulu!');
                 return;
             }
 
@@ -504,18 +498,7 @@
 
             try {
                 const response = await axios.post(URL_UPLOAD, formData);
-                const data = response.data;
-
-                document.getElementById('resultSection').classList.remove('hidden');
-                document.getElementById('resDisease').innerText = data.disease_name;
-                document.getElementById('resConfidenceBar').style.width = data.confidence + "%";
-                document.getElementById('resConfidenceText').innerText = data.confidence + "%";
-
-                currentDisease = data.disease_name;
-                document.getElementById('chatContextDisease').innerText = currentDisease;
-
-                const analisaRapi = formatText(data.solution);
-                addBotMessage(`💡 <b>Hasil Diagnosa (${data.confidence}%):</b><br><br>${analisaRapi}`);
+                renderDiagnosisResult(response.data);
 
             } catch (error) {
                 console.error(error);
@@ -523,7 +506,7 @@
                 if (error.response && error.response.data) {
                     msg = error.response.data.error || error.response.data.message || msg;
                 }
-                alert(msg);
+                showToast('error', msg);
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -537,6 +520,7 @@
             e.preventDefault();
             const input = document.getElementById('chatInput');
             const question = input.value.trim();
+            const hasDiagnosisImage = !!attachedFile;
 
             // Minimal harus ada salah satu: text, file, atau URL
             if (!question && !attachedFile && !attachedUrl) return;
@@ -546,38 +530,51 @@
             if (attachedFile) {
                 userDisplay += `<div class="mb-1"><span class="inline-flex items-center gap-1 bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded"><i class="fa-solid fa-image"></i> ${escapeHtml(attachedFile.name)}</span></div>`;
             }
-            if (attachedUrl) {
+            if (attachedUrl && !hasDiagnosisImage) {
                 userDisplay += `<div class="mb-1"><span class="inline-flex items-center gap-1 bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded"><i class="fa-solid fa-link"></i> ${escapeHtml(attachedUrl)}</span></div>`;
             }
-            if (question) {
+            if (question && !hasDiagnosisImage) {
                 // Replace newlines with <br> for display
                 userDisplay += escapeHtml(question).replace(/\n/g, '<br>');
+            } else if (hasDiagnosisImage) {
+                userDisplay += '<div class="text-xs opacity-80">Foto dikirim untuk diagnosa</div>';
+                if (question) {
+                    userDisplay += `<div class="text-xs opacity-80 mt-1">Catatan: ${escapeHtml(question)}</div>`;
+                }
             }
             addUserMessage(userDisplay);
 
             input.value = "";
             input.style.height = 'auto'; // Reset height
             document.getElementById('chatLoading').classList.remove('hidden');
+            addSkeletonMessage();
 
             // Build FormData
             const formData = new FormData();
-            if (question) formData.append('message', question);
-            formData.append('disease_context', currentDisease);
-
-            if (attachedFile) {
-                formData.append('file', attachedFile);
-            }
-            if (attachedUrl) {
-                formData.append('url', attachedUrl);
-            }
 
             try {
-                const response = await axios.post(URL_CHAT, formData);
-                const jawabanRapi = formatText(response.data.answer);
-                const modelUsed = response.data.model_used || '';
-                const typeIcon = response.data.type === 'vision' ? '👁️' : response.data.type === 'url' ? '🔗' : '💬';
+                if (hasDiagnosisImage) {
+                    formData.append('file', attachedFile);
+                    const response = await axios.post(URL_UPLOAD, formData);
+                    renderDiagnosisResult(response.data);
+                } else {
+                    if (question) formData.append('message', question);
+                    formData.append('disease_context', currentDisease);
 
-                addBotMessage(`${jawabanRapi}<div class="mt-2 text-[10px] text-gray-400">${typeIcon} ${modelUsed}</div>`);
+                    if (attachedFile) {
+                        formData.append('file', attachedFile);
+                    }
+                    if (attachedUrl) {
+                        formData.append('url', attachedUrl);
+                    }
+
+                    const response = await axios.post(URL_CHAT, formData);
+                    const jawabanRapi = formatText(response.data.answer);
+                    const modelUsed = response.data.model_used || '';
+                    const typeIcon = response.data.type === 'vision' ? '👁️' : response.data.type === 'url' ? '🔗' : '💬';
+
+                    addBotMessage(`${jawabanRapi}<div class="mt-2 text-[10px] text-gray-400">${typeIcon} ${modelUsed}</div>`);
+                }
 
             } catch (error) {
                 console.error(error);
@@ -594,7 +591,13 @@
                 addBotMessage("⚠️ " + escapeHtml(msg));
             } finally {
                 document.getElementById('chatLoading').classList.add('hidden');
-                removeAttachedFile();
+                document.getElementById('skeleton-msg')?.remove();
+                if (hasDiagnosisImage) {
+                    removeAttachedFile();
+                    removeAttachedUrl();
+                } else {
+                    removeAttachedFile();
+                }
                 // removeAttachedUrl(); // Jangan hapus URL agar konteks tetap terjaga untuk chat berikutnya
             }
         });
@@ -643,7 +646,97 @@
             input.value = text;
             input.focus();
             // Optional: Auto submit? Maybe better to let user confirm.
-            // document.getElementById('chatForm').requestSubmit(); 
+            // document.getElementById('chatForm').requestSubmit();
+        }
+
+        // ============================================================
+        // CONFIRM DIALOG SYSTEM
+        // ============================================================
+        function showConfirmDialog(title, message, confirmText = 'Ya', cancelText = 'Batal') {
+            return new Promise((resolve) => {
+                const id = 'dialog-' + Date.now();
+
+                const dialogHTML = `
+                    <div id="${id}-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
+                    <div id="${id}" class="fixed inset-0 flex items-center justify-center z-50 p-4">
+                        <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full">
+                            <div class="p-6 border-b border-gray-200">
+                                <h3 class="text-lg font-bold text-gray-900">${escapeHtml(title)}</h3>
+                            </div>
+                            <div class="p-6">
+                                <p class="text-gray-600">${escapeHtml(message)}</p>
+                            </div>
+                            <div class="p-6 border-t border-gray-200 flex gap-3 justify-end">
+                                <button onclick="document.getElementById('${id}').remove(); document.getElementById('${id}-overlay').remove();" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition">
+                                    ${escapeHtml(cancelText)}
+                                </button>
+                                <button onclick="document.getElementById('${id}').remove(); document.getElementById('${id}-overlay').remove(); window.confirmDialogResolve('${id}', true);" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition">
+                                    ${escapeHtml(confirmText)}
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+
+                window.confirmDialogResolve = (dialogId, result) => resolve(result);
+
+                document.body.insertAdjacentHTML('beforeend', dialogHTML);
+            });
+        }
+
+        // ============================================================
+        // SKELETON LOADER FOR CHAT
+        // ============================================================
+        function addSkeletonMessage() {
+            const history = document.getElementById('chatHistory');
+            const skeletonHTML = `
+                <div id="skeleton-msg" class="flex gap-3 animate-fade-in-up">
+                    <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 mt-1 animate-pulse"></div>
+                    <div class="bg-white px-4 py-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-700 max-w-[90%] border border-gray-100 leading-relaxed space-y-2">
+                        <div class="h-4 bg-gray-200 rounded animate-pulse"></div>
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-5/6"></div>
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-4/5"></div>
+                    </div>
+                </div>`;
+            history.insertAdjacentHTML('beforeend', skeletonHTML);
+            history.scrollTop = history.scrollHeight;
+        }
+
+        // ============================================================
+        // TOAST NOTIFICATION SYSTEM
+        // ============================================================
+        function showToast(type, message, duration = 4000) {
+            const id = 'toast-' + Date.now();
+
+            const bgColor = {
+                'success': 'bg-green-500',
+                'error': 'bg-red-500',
+                'info': 'bg-blue-500',
+                'warning': 'bg-yellow-500'
+            }[type] || 'bg-gray-500';
+
+            const icon = {
+                'success': 'fa-check-circle',
+                'error': 'fa-exclamation-circle',
+                'info': 'fa-info-circle',
+                'warning': 'fa-triangle-exclamation'
+            }[type] || 'fa-bell';
+
+            const toastHTML = `
+                <div id="${id}" class="fixed bottom-4 right-4 ${bgColor} text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-fade-in-up z-50 max-w-sm">
+                    <i class="fa-solid ${icon}"></i>
+                    <span>${escapeHtml(message)}</span>
+                    <button onclick="document.getElementById('${id}').remove()" class="ml-2 text-white/70 hover:text-white transition">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>`;
+
+            document.body.insertAdjacentHTML('beforeend', toastHTML);
+
+            // Auto-dismiss
+            setTimeout(() => {
+                const el = document.getElementById(id);
+                if (el) el.remove();
+            }, duration);
         }
     </script>
 </body>
