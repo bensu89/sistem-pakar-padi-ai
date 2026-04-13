@@ -41,33 +41,33 @@ Route::get('auth/google/callback', [\App\Http\Controllers\Auth\GoogleController:
 // --- ADMIN ROUTES (Dilindungi Auth) ---
 Route::middleware('auth')->group(function () {
 
-    // 3. Halaman Dashboard (Monitoring)
-    Route::get('/monitoring-penelitian', [AdminController::class, 'index'])->name('admin.index');
-
-    // --- TENTATIVE: ROUTE UNTUK RESET/BUAT USER ADMIN (HAPUS NANTI SETELAH DIPAKAI) ---
+    // --- TENTATIVE: ROUTE UNTUK SET ADMIN ---
     Route::get('/setup-admin', function () {
         try {
-            $user = \App\Models\User::updateOrCreate(
-                ['email' => 'admin@padi.com'],
-                [
-                    'name' => 'Admin Padi',
-                    'password' => bcrypt('password'), // Password default
-                    'email_verified_at' => now(),
-                ]
-            );
-            return "User Admin Berhasil Dibuat!<br>Email: admin@padi.com<br>Password: password<br><a href='/login'>Login Disini</a>";
+            $user = \App\Models\User::where('email', 'bebensutara@gmail.com')->first();
+            if ($user) {
+                $user->update(['is_admin' => true]);
+                return "SUKSES! Akun bebensutara@gmail.com sekarang adalah Administrator.<br><a href='/monitoring-penelitian'>Ke Panel Monitoring</a>";
+            }
+            return "Gagal: Akun bebensutara@gmail.com belum login/terdaftar via Google. Silakan login terlebih dahulu.";
         } catch (\Exception $e) {
             return "Gagal: " . $e->getMessage();
         }
     });
 
-    // 4. Hapus Data Diagnosa Valid
-    Route::delete('/monitoring-penelitian/{id}', [AdminController::class, 'destroy'])->name('admin.destroy');
+    // Rute yang butuh akses penuh (Admin)
+    Route::middleware('admin')->group(function () {
+        // 3. Halaman Dashboard (Monitoring)
+        Route::get('/monitoring-penelitian', [AdminController::class, 'index'])->name('admin.index');
 
-    // 5. Export Excel/CSV
-    Route::get('/export-laporan', [AdminController::class, 'export'])->name('admin.export');
+        // 4. Hapus Data Diagnosa Valid
+        Route::delete('/monitoring-penelitian/{id}', [AdminController::class, 'destroy'])->name('admin.destroy');
 
-    // 6. Hapus Data Sampah (Salah Upload)
-    Route::delete('/hapus-sampah/{id}', [AdminController::class, 'destroyFailed'])->name('admin.destroyFailed');
+        // 5. Export Excel/CSV
+        Route::get('/export-laporan', [AdminController::class, 'export'])->name('admin.export');
+
+        // 6. Hapus Data Sampah (Salah Upload)
+        Route::delete('/hapus-sampah/{id}', [AdminController::class, 'destroyFailed'])->name('admin.destroyFailed');
+    });
 
 }); // Akhir group auth

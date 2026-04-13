@@ -112,10 +112,12 @@
                         Topik: <span id="chatContextDisease" class="font-bold text-gray-700">Umum</span>
                     </div>
                     @auth
-                        <a href="{{ route('admin.index') }}"
-                            class="bg-white text-gray-700 hover:text-green-600 px-3 py-1.5 rounded-lg shadow-sm font-bold text-xs flex items-center gap-2 transition hover:shadow-md border border-gray-200">
-                            <i class="fa-solid fa-gauge-high"></i> Dashboard
-                        </a>
+                        @if(auth()->user()->is_admin)
+                            <a href="{{ route('admin.index') }}"
+                                class="bg-white text-gray-700 hover:text-green-600 px-3 py-1.5 rounded-lg shadow-sm font-bold text-xs flex items-center gap-2 transition hover:shadow-md border border-gray-200">
+                                <i class="fa-solid fa-gauge-high"></i> Dashboard Admin
+                            </a>
+                        @endif
                     @else
                         <a href="{{ route('login') }}"
                             class="bg-white/80 backdrop-blur text-gray-500 hover:text-blue-600 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition hover:bg-white hover:shadow-sm border border-transparent hover:border-blue-100">
