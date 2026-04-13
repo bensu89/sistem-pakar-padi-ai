@@ -34,6 +34,10 @@ Route::get('/test-scrape', function (Illuminate\Http\Request $request) {
 // Authentication Routes (Login, Register, Logout, dll)
 Auth::routes();
 
+// --- GOOGLE OAUTH ROUTES ---
+Route::get('auth/google', [\App\Http\Controllers\Auth\GoogleController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('auth/google/callback', [\App\Http\Controllers\Auth\GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+
 // --- ADMIN ROUTES (Dilindungi Auth) ---
 Route::middleware('auth')->group(function () {
 

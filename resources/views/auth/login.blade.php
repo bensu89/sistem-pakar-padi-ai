@@ -141,6 +141,18 @@
                     <i class="fa-solid fa-right-to-bracket"></i> Masuk
                 </button>
             </form>
+
+            <div class="mt-6 flex items-center justify-center space-x-2">
+                <span class="h-px w-1/3 bg-gray-200"></span>
+                <span class="text-xs text-gray-400 font-medium uppercase">Atau</span>
+                <span class="h-px w-1/3 bg-gray-200"></span>
+            </div>
+
+            <!-- Login with Google Button -->
+            <a href="{{ route('google.login') }}" class="mt-4 w-full bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 font-medium text-sm py-3 px-4 rounded-xl flex items-center justify-center gap-3 transition-colors shadow-sm cursor-pointer">
+                <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true" class="w-5 h-5"><path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"></path><path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"></path><path fill="#FBBC05" d="M11.69 28.18A12.944 12.944 0 0 1 11 24c0-1.47.25-2.9.72-4.18v-5.7H4.34A23.978 23.978 0 0 0 0 24c0 3.86 1.19 7.42 3.16 10.37l8.53-6.19z"></path><path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.38 5.7c1.73-5.2 6.58-9.07 12.28-9.07z"></path></svg>
+                Masuk dengan Google
+            </a>
         </div>
 
         <!-- Register Link -->
