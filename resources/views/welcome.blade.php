@@ -257,9 +257,7 @@
                     </div>
                     <h3 class="font-bold text-gray-900 text-lg text-center mb-2">Upload Foto Daun</h3>
                     <p class="text-gray-600 text-sm text-center">Ambil atau unggah foto daun padi yang terlihat sakit dari perangkat Anda.</p>
-                    @if (!$loop->last ?? true)
-                        <div class="hidden md:block absolute top-8 left-[calc(100%)] w-full h-1 bg-gradient-to-r from-green-500 to-emerald-600" style="width: calc(200% + 24px); margin-left: 12px;"></div>
-                    @endif
+                    <div class="hidden md:block absolute top-8 left-[calc(100%)] w-full h-1 bg-gradient-to-r from-green-500 to-emerald-600" style="width: calc(200% + 24px); margin-left: 12px;"></div>
                 </div>
 
                 <!-- Step 2 -->
@@ -269,6 +267,7 @@
                     </div>
                     <h3 class="font-bold text-gray-900 text-lg text-center mb-2">AI Analisis</h3>
                     <p class="text-gray-600 text-sm text-center">Model Vision AI kami menganalisis gambar dalam hitungan detik untuk identifikasi akurat.</p>
+                    <div class="hidden md:block absolute top-8 left-[calc(100%)] w-full h-1 bg-gradient-to-r from-emerald-500 to-teal-600" style="width: calc(200% + 24px); margin-left: 12px;"></div>
                 </div>
 
                 <!-- Step 3 -->
@@ -278,6 +277,7 @@
                     </div>
                     <h3 class="font-bold text-gray-900 text-lg text-center mb-2">Terima Hasil</h3>
                     <p class="text-gray-600 text-sm text-center">Dapatkan nama penyakit, tingkat akurasi, dan solusi penanganan yang detail.</p>
+                    <div class="hidden md:block absolute top-8 left-[calc(100%)] w-full h-1 bg-gradient-to-r from-teal-500 to-cyan-600" style="width: calc(200% + 24px); margin-left: 12px;"></div>
                 </div>
 
                 <!-- Step 4 -->
