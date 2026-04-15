@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Diagnosis;      // Model Data Valid
+use App\Models\PohaciMonitoring;
 use App\Models\FailedUpload;   // Model Data Sampah
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -24,17 +24,27 @@ class AdminController extends Controller
         // Search parameter
         $search = $request->query('search', '');
 
-        // Filter parameters untuk Diagnosis
+        // Filter parameters untuk Monitoring
         $diagnosisConfidenceMin = $request->query('confidence_min');
         $diagnosisConfidenceMax = $request->query('confidence_max');
         $dateFrom = $request->query('date_from');
         $dateTo = $request->query('date_to');
+        $analysisMode = $request->query('analysis_mode', '');
+        $followupStatus = $request->query('followup_status', '');
 
-        // Build Diagnosis query with filters
-        $diagnosisQuery = Diagnosis::query();
+        // Build Monitoring query with filters
+        $diagnosisQuery = PohaciMonitoring::query();
 
         if ($search) {
-            $diagnosisQuery->where('disease_name', 'LIKE', "%{$search}%");
+            $diagnosisQuery->where(function ($query) use ($search) {
+                $query->where('disease_name', 'LIKE', "%{$search}%")
+                    ->orWhere('reporter_name', 'LIKE', "%{$search}%")
+                    ->orWhere('reporter_email', 'LIKE', "%{$search}%")
+                    ->orWhere('location_label', 'LIKE', "%{$search}%")
+                    ->orWhere('coordinate_source', 'LIKE', "%{$search}%")
+                    ->orWhere('analysis_mode', 'LIKE', "%{$search}%")
+                    ->orWhere('followup_status', 'LIKE', "%{$search}%");
+            });
         }
 
         if ($diagnosisConfidenceMin !== null) {
@@ -51,6 +61,14 @@ class AdminController extends Controller
 
         if ($dateTo) {
             $diagnosisQuery->whereDate('created_at', '<=', $dateTo);
+        }
+
+        if ($analysisMode) {
+            $diagnosisQuery->where('analysis_mode', $analysisMode);
+        }
+
+        if ($followupStatus) {
+            $diagnosisQuery->where('followup_status', $followupStatus);
         }
 
         $data = $diagnosisQuery->latest()->paginate(15)->appends($request->query());
@@ -79,39 +97,47 @@ class AdminController extends Controller
         if ($diagnosisConfidenceMax !== null) $activeFilters['confidence_max'] = $diagnosisConfidenceMax;
         if ($dateFrom) $activeFilters['date_from'] = $dateFrom;
         if ($dateTo) $activeFilters['date_to'] = $dateTo;
+        if ($analysisMode) $activeFilters['analysis_mode'] = $analysisMode;
+        if ($followupStatus) $activeFilters['followup_status'] = $followupStatus;
 
         return view('admin.index', compact('data', 'sampah', 'search', 'activeFilters',
-            'diagnosisConfidenceMin', 'diagnosisConfidenceMax', 'dateFrom', 'dateTo'));
+            'diagnosisConfidenceMin', 'diagnosisConfidenceMax', 'dateFrom', 'dateTo', 'analysisMode', 'followupStatus'));
     }
 
-    // 2. HAPUS DATA DIAGNOSA
+    // 2. HAPUS DATA MONITORING
     public function destroy($id)
     {
-        $item = Diagnosis::find($id);
+        $item = PohaciMonitoring::find($id);
         if ($item) {
             // Hapus file fisik gambar agar hemat penyimpanan
-            if (file_exists(public_path($item->image_path))) {
+            if ($item->image_path && file_exists(public_path($item->image_path))) {
                 unlink(public_path($item->image_path));
             }
             $item->delete();
         }
-        return back()->with('success', 'Data berhasil dihapus');
+        return back()->with('success', 'Data monitoring berhasil dihapus');
     }
 
     // 3. EXPORT DATA KE EXCEL (.XLSX)
     public function export()
     {
-        $fileName = 'Laporan_Padi_' . date('Y-m-d_H-i') . '.xlsx';
+        $fileName = 'Laporan_Pohaci_Monitoring_' . date('Y-m-d_H-i') . '.xlsx';
 
-        // Get all diagnosis data
-        $data = Diagnosis::latest()->get()->map(function($item, $index) {
+        // Get all monitoring data
+        $data = PohaciMonitoring::latest()->get()->map(function($item, $index) {
             return [
                 'No' => $index + 1,
-                'Tanggal Scan' => $item->created_at->format('d-m-Y H:i'),
-                'Nama Penyakit' => $item->disease_name,
+                'Petani / Akun' => $item->reporter_name ?? '-',
+                'Waktu Laporan' => $item->created_at->format('d-m-Y H:i'),
+                'Lokasi' => trim(($item->latitude ?? '-') . ', ' . ($item->longitude ?? '-')),
+                'Sumber Koordinat' => $item->coordinate_source ?? '-',
+                'Hasil Diagnosa' => $item->disease_name ?? '-',
                 'Akurasi (%)' => $item->confidence,
-                'Solusi AI' => $item->solution,
-                'Lokasi Gambar' => asset($item->image_path)
+                'NDVI' => $item->ndvi_value,
+                'Mode Analisa' => $item->analysis_mode,
+                'Rekomendasi' => $item->recommendation ?? $item->solution,
+                'Status Tindak Lanjut' => $item->followup_status ?? '-',
+                'Lokasi Gambar' => $item->image_path ? asset($item->image_path) : '-'
             ];
         });
 
@@ -120,19 +146,25 @@ class AdminController extends Controller
             new class implements FromCollection, WithHeadings {
                 public function headings(): array
                 {
-                    return ['No', 'Tanggal Scan', 'Nama Penyakit', 'Akurasi (%)', 'Solusi AI', 'Lokasi Gambar'];
+                    return ['No', 'Petani / Akun', 'Waktu Laporan', 'Lokasi', 'Sumber Koordinat', 'Hasil Diagnosa', 'Akurasi (%)', 'NDVI', 'Mode Analisa', 'Rekomendasi', 'Status Tindak Lanjut', 'Lokasi Gambar'];
                 }
 
                 public function collection()
                 {
-                    $data = Diagnosis::latest()->get()->map(function($item, $index) {
+                    $data = PohaciMonitoring::latest()->get()->map(function($item, $index) {
                         return [
                             'No' => $index + 1,
-                            'Tanggal Scan' => $item->created_at->format('d-m-Y H:i'),
-                            'Nama Penyakit' => $item->disease_name,
+                            'Petani / Akun' => $item->reporter_name ?? '-',
+                            'Waktu Laporan' => $item->created_at->format('d-m-Y H:i'),
+                            'Lokasi' => trim(($item->latitude ?? '-') . ', ' . ($item->longitude ?? '-')),
+                            'Sumber Koordinat' => $item->coordinate_source ?? '-',
+                            'Hasil Diagnosa' => $item->disease_name ?? '-',
                             'Akurasi (%)' => $item->confidence,
-                            'Solusi AI' => $item->solution,
-                            'Lokasi Gambar' => asset($item->image_path)
+                            'NDVI' => $item->ndvi_value,
+                            'Mode Analisa' => $item->analysis_mode,
+                            'Rekomendasi' => $item->recommendation ?? $item->solution,
+                            'Status Tindak Lanjut' => $item->followup_status ?? '-',
+                            'Lokasi Gambar' => $item->image_path ? asset($item->image_path) : '-'
                         ];
                     });
                     return collect($data);

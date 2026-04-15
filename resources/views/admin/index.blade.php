@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Penelitian Padi</title>
+    <title>Monitoring Penelitian Padi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -18,24 +18,24 @@
             </div>
             <div>
                 <h1 class="font-bold text-gray-800 text-lg">Pohaci AI: Ngariksa Pare, Ngajaga Lemah Cai</h1>
-                <p class="text-xs text-gray-500">Monitoring Diagnosa Daun Padi</p>
+                <p class="text-xs text-gray-500">Monitoring Penelitian Padi</p>
             </div>
         </div>
         <div class="flex gap-3">
             <a href="{{ route('home') }}"
                 class="px-4 py-2 text-sm text-gray-600 hover:text-green-600 bg-gray-50 rounded-lg border border-gray-200 transition">
-                <i class="fa-solid fa-arrow-left"></i> Kembali ke Scan
+                <i class="fa-solid fa-arrow-left"></i> Kembali ke Cek Kesehatan
             </a>
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto p-6">
+        <div class="max-w-7xl mx-auto p-6">
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-blue-500 flex justify-between items-center">
                 <div>
-                    <p class="text-gray-500 text-sm">Total Data Valid</p>
+                    <p class="text-gray-500 text-sm">Total Monitoring Masuk</p>
                     <h3 class="text-2xl font-bold text-gray-800">{{ $data->total() }} <span
                             class="text-sm font-normal">Sampel</span></h3>
                 </div>
@@ -44,7 +44,7 @@
 
             <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-red-500 flex justify-between items-center">
                 <div>
-                    <p class="text-gray-500 text-sm">Ditolak (Bukan Padi)</p>
+                    <p class="text-gray-500 text-sm">Data Ditolak / Bukan Padi</p>
                     <h3 class="text-2xl font-bold text-gray-800">{{ $sampah->total() }} <span
                             class="text-sm font-normal">File</span></h3>
                 </div>
@@ -52,7 +52,7 @@
             </div>
 
             <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-green-500 flex flex-col justify-center">
-                <p class="text-gray-500 text-sm mb-2">Laporan Penelitian</p>
+                <p class="text-gray-500 text-sm mb-2">Laporan Monitoring</p>
                 <a href="{{ route('admin.export') }}"
                     class="bg-green-600 hover:bg-green-700 text-white text-center py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center justify-center gap-2">
                     <i class="fa-solid fa-file-csv"></i> Download CSV / Excel
@@ -62,15 +62,15 @@
 
         <!-- Filter UI -->
         <div class="bg-white rounded-xl shadow-sm p-5 mb-8 border border-gray-200">
-            <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-funnel text-green-600"></i> Filter Data
+                <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-funnel text-green-600"></i> Filter Monitoring
             </h3>
 
             <form method="GET" action="{{ route('admin.index') }}" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- Search Input -->
                     <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-2">Cari (Nama Penyakit / Alasan)</label>
+                        <label class="block text-xs font-semibold text-gray-600 mb-2">Cari (Petani / Penyakit / Lokasi)</label>
                         <div class="relative">
                             <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400 text-sm"></i>
                             <input type="text" name="search" value="{{ $search ?? '' }}"
@@ -95,7 +95,7 @@
 
                     <!-- Confidence Filter -->
                     <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-2">Filter Akurasi (Diagnosis)</label>
+                        <label class="block text-xs font-semibold text-gray-600 mb-2">Filter Akurasi AI</label>
                         <select name="confidence_min"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none">
                             <option value="">Semua Akurasi</option>
@@ -110,7 +110,7 @@
                 <div class="flex gap-3">
                     <button type="submit"
                         class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium text-sm transition flex items-center gap-2">
-                        <i class="fa-solid fa-check"></i> Terapkan Filter
+                            <i class="fa-solid fa-check"></i> Terapkan Filter
                     </button>
                     <a href="{{ route('admin.index') }}"
                         class="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium text-sm transition flex items-center gap-2">
@@ -148,7 +148,7 @@
         <!-- Data Valid Table -->
         <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200 mb-10">
             <div class="p-5 border-b flex justify-between items-center bg-gray-50">
-                <h2 class="font-bold text-gray-700">📋 Log Data Valid (Penyakit Terdeteksi)</h2>
+                <h2 class="font-bold text-gray-700">📋 Log Monitoring Penelitian</h2>
                 <span class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold">Live Data</span>
             </div>
 
@@ -157,38 +157,74 @@
                 <table class="w-full text-sm text-left text-gray-500">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-100 border-b-2 border-gray-300 shadow-sm">
                         <tr>
+                            <th class="px-6 py-3">Petani / Akun</th>
                             <th class="px-6 py-3">Waktu</th>
-                            <th class="px-6 py-3">Citra Daun</th>
+                            <th class="px-6 py-3">Lokasi / Koordinat</th>
+                            <th class="px-6 py-3">Sumber Koordinat</th>
+                            <th class="px-6 py-3">Foto</th>
                             <th class="px-6 py-3">Hasil Diagnosa</th>
-                            <th class="px-6 py-3">Akurasi AI</th>
+                            <th class="px-6 py-3">NDVI</th>
+                            <th class="px-6 py-3">Mode</th>
+                            <th class="px-6 py-3">Rekomendasi</th>
+                            <th class="px-6 py-3">Status</th>
                             <th class="px-6 py-3 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($data as $item)
                             <tr class="bg-white border-b hover:bg-gray-50 transition">
+                                <td class="px-6 py-4">
+                                    <div class="font-semibold text-gray-800">{{ $item->reporter_name ?? '-' }}</div>
+                                    <div class="text-xs text-gray-500">{{ $item->reporter_email ?? '-' }}</div>
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     {{ $item->created_at->format('d M Y') }} <br>
                                     <span class="text-xs text-gray-400">{{ $item->created_at->format('H:i') }} WIB</span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div
-                                        class="h-16 w-16 rounded-lg overflow-hidden border border-gray-200 shadow-sm group relative">
-                                        <img src="{{ asset($item->image_path) }}"
-                                            class="object-cover w-full h-full transform group-hover:scale-110 transition duration-300"
-                                            alt="Padi">
+                                    <div class="text-sm text-gray-700">
+                                        <div class="font-semibold">{{ $item->location_label ?? '-' }}</div>
+                                        <div class="text-xs text-gray-400">{{ $item->latitude ?? '-' }}, {{ $item->longitude ?? '-' }}</div>
                                     </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-700">
+                                        {{ $item->coordinate_source ?? '-' }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    @if($item->image_path)
+                                        <div class="h-16 w-16 rounded-lg overflow-hidden border border-gray-200 shadow-sm group relative">
+                                            <img src="{{ asset($item->image_path) }}"
+                                                class="object-cover w-full h-full transform group-hover:scale-110 transition duration-300"
+                                                alt="Padi">
+                                        </div>
+                                    @else
+                                        <span class="text-xs text-gray-400">Tidak ada</span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="font-bold text-gray-800 text-base block">{{ $item->disease_name }}</span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    @php
-                                        $conf = floatval($item->confidence);
-                                        $color = $conf > 80 ? 'bg-green-100 text-green-700' : ($conf > 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700');
-                                    @endphp
-                                    <span class="{{ $color }} px-2 py-1 rounded-full font-bold text-xs">
-                                        {{ number_format($conf, 2) }}%
+                                    @php $ndvi = $item->ndvi_value !== null ? number_format((float) $item->ndvi_value, 5) : '-'; @endphp
+                                    <span class="px-2 py-1 rounded-full font-bold text-xs bg-blue-100 text-blue-700">
+                                        {{ $ndvi }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold {{ $item->analysis_mode === 'spatial' ? 'bg-emerald-100 text-emerald-700' : ($item->analysis_mode === 'spatial_fallback' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700') }}">
+                                        {{ $item->analysis_mode ?? '-' }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="max-w-xs text-sm text-gray-700 line-clamp-3">
+                                        {{ $item->recommendation ?? $item->solution ?? '-' }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold {{ $item->followup_status === 'done' ? 'bg-green-100 text-green-700' : ($item->followup_status === 'in_progress' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700') }}">
+                                        {{ $item->followup_status ?? 'pending' }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-center">
@@ -205,7 +241,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-10 text-center text-gray-400 bg-gray-50">
+                                <td colspan="11" class="px-6 py-10 text-center text-gray-400 bg-gray-50">
                                     <div class="flex flex-col items-center">
                                         <i class="fa-solid fa-folder-open text-3xl mb-2 text-gray-300"></i>
                                         <p>Belum ada data penelitian.</p>
@@ -221,38 +257,70 @@
             <div class="md:hidden">
                 @forelse($data as $item)
                     <div class="border-b p-4 space-y-3 hover:bg-gray-50 transition">
-                        <!-- Image -->
-                        <div
-                            class="h-32 w-full rounded-lg overflow-hidden border border-gray-200 shadow-sm">
-                            <img src="{{ asset($item->image_path) }}"
-                                class="object-cover w-full h-full"
-                                alt="Padi">
-                        </div>
-
                         <!-- Content -->
                         <div class="space-y-2">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <p class="text-xs text-gray-500 font-semibold">Waktu</p>
-                                    <p class="text-sm font-medium text-gray-800">
-                                        {{ $item->created_at->format('d M Y H:i') }} WIB
-                                    </p>
-                                </div>
+                            <div>
+                                <p class="text-xs text-gray-500 font-semibold">Petani / Akun</p>
+                                <p class="text-sm font-medium text-gray-800">{{ $item->reporter_name ?? '-' }}</p>
+                                <p class="text-xs text-gray-400">{{ $item->reporter_email ?? '-' }}</p>
+                            </div>
+
+                            <div>
+                                <p class="text-xs text-gray-500 font-semibold">Waktu</p>
+                                <p class="text-sm font-medium text-gray-800">
+                                    {{ $item->created_at->format('d M Y H:i') }} WIB
+                                </p>
+                            </div>
+
+                            <div>
+                                <p class="text-xs text-gray-500 font-semibold">Lokasi / Koordinat</p>
+                                <p class="text-base font-bold text-gray-800">{{ $item->location_label ?? '-' }}</p>
+                                <p class="text-xs text-gray-400">{{ $item->latitude ?? '-' }}, {{ $item->longitude ?? '-' }}</p>
+                            </div>
+
+                            <div>
+                                <p class="text-xs text-gray-500 font-semibold">Sumber Koordinat</p>
+                                <span class="px-2 py-1 rounded-full font-bold text-xs inline-block bg-gray-100 text-gray-700">
+                                    {{ $item->coordinate_source ?? '-' }}
+                                </span>
+                            </div>
+
+                            <div>
+                                <p class="text-xs text-gray-500 font-semibold">Foto</p>
+                                @if($item->image_path)
+                                    <div class="h-28 w-full rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+                                        <img src="{{ asset($item->image_path) }}" class="object-cover w-full h-full" alt="Padi">
+                                    </div>
+                                @else
+                                    <p class="text-sm text-gray-400">Tidak ada foto</p>
+                                @endif
                             </div>
 
                             <div>
                                 <p class="text-xs text-gray-500 font-semibold">Hasil Diagnosa</p>
-                                <p class="text-base font-bold text-gray-800">{{ $item->disease_name }}</p>
+                                <p class="text-base font-bold text-gray-800">{{ $item->disease_name ?? '-' }}</p>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <p class="text-xs text-gray-500 font-semibold">NDVI</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ $item->ndvi_value !== null ? number_format((float) $item->ndvi_value, 5) : '-' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 font-semibold">Mode</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ $item->analysis_mode ?? '-' }}</p>
+                                </div>
                             </div>
 
                             <div>
-                                <p class="text-xs text-gray-500 font-semibold">Akurasi AI</p>
-                                @php
-                                    $conf = floatval($item->confidence);
-                                    $color = $conf > 80 ? 'bg-green-100 text-green-700' : ($conf > 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700');
-                                @endphp
-                                <span class="{{ $color }} px-2 py-1 rounded-full font-bold text-xs inline-block">
-                                    {{ number_format($conf, 2) }}%
+                                <p class="text-xs text-gray-500 font-semibold">Rekomendasi</p>
+                                <p class="text-sm text-gray-800">{{ $item->recommendation ?? $item->solution ?? '-' }}</p>
+                            </div>
+
+                            <div>
+                                <p class="text-xs text-gray-500 font-semibold">Status Tindak Lanjut</p>
+                                <span class="px-2 py-1 rounded-full font-bold text-xs inline-block {{ $item->followup_status === 'done' ? 'bg-green-100 text-green-700' : ($item->followup_status === 'in_progress' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700') }}">
+                                    {{ $item->followup_status ?? 'pending' }}
                                 </span>
                             </div>
                         </div>

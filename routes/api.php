@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\PohaciAnalysisController;
 
 /*
@@ -63,3 +64,37 @@ Route::get('/gee', function () {
 });
 
 Route::post('/pohaci/analyze', [PohaciAnalysisController::class, 'analyze']);
+
+Route::get('/pohaci/health', function () {
+    $status = 'ok';
+    $checks = [
+        'backend' => 'ok',
+        'database' => 'unknown',
+        'groq' => 'unknown',
+        'gee' => 'unknown',
+    ];
+
+    try {
+        DB::select('select 1');
+        $checks['database'] = 'ok';
+    } catch (\Throwable $e) {
+        $checks['database'] = 'error';
+        $status = 'degraded';
+    }
+
+    $groqReady = filled(config('services.groq.api_key'));
+    $geeReady = filled(config('services.gee.client_email')) && filled(config('services.gee.private_key'));
+
+    $checks['groq'] = $groqReady ? 'ok' : 'missing_config';
+    $checks['gee'] = $geeReady ? 'ok' : 'missing_config';
+
+    if (!$groqReady || !$geeReady) {
+        $status = 'degraded';
+    }
+
+    return response()->json([
+        'status' => $status,
+        'checks' => $checks,
+        'timestamp' => now()->toIso8601String(),
+    ]);
+});

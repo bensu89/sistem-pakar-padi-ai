@@ -80,7 +80,7 @@
 
         <!-- Login Card -->
         <div class="glass rounded-2xl shadow-xl shadow-gray-200/50 border border-white/60 p-8">
-            <form method="POST" action="{{ route('login') }}" class="space-y-5">
+            <form method="POST" action="{{ route('login') }}" class="space-y-5" autocomplete="off">
                 @csrf
 
                 <!-- Email -->
@@ -88,7 +88,7 @@
                     <label for="email" class="block text-sm font-semibold text-gray-700 mb-1.5">
                         <i class="fa-solid fa-envelope text-green-500 mr-1"></i> Email
                     </label>
-                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="email"
+                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="off"
                         autofocus
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white/70 focus:bg-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition outline-none text-sm @error('email') border-red-400 @enderror"
                         placeholder="nama@email.com">
@@ -105,7 +105,7 @@
                         <i class="fa-solid fa-lock text-green-500 mr-1"></i> Password
                     </label>
                     <div class="relative">
-                        <input id="password" type="password" name="password" required autocomplete="current-password"
+                        <input id="password" type="password" name="password" required autocomplete="new-password"
                             class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white/70 focus:bg-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition outline-none text-sm pr-12 @error('password') border-red-400 @enderror"
                             placeholder="••••••••">
                         <button type="button" onclick="togglePassword()"

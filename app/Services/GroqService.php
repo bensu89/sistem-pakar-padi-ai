@@ -19,6 +19,14 @@ Jawab dalam Bahasa Indonesia yang mudah dipahami petani. Gunakan poin-poin jika 
 Jika ada gambar, analisa kondisi tanaman secara detail.
 Jika pertanyaan di luar topik pertanian, arahkan kembali ke topik pertanian padi.';
 
+    protected function getSystemPrompt(): string
+    {
+        \Carbon\Carbon::setLocale('id');
+        $currentDate = now()->timezone('Asia/Jakarta')->translatedFormat('l, d F Y, H:i');
+        
+        return $this->systemPrompt . "\n\n[Informasi Sistem]\nWaktu saat ini: {$currentDate} WIB. Jika user bertanya tentang waktu, tanggal, bulan, atau musim tanam saat ini, gunakan informasi ini sebagai acuan.";
+    }
+
     // System prompt khusus untuk diagnosa daun
     protected string $diagnosisPrompt = 'Kamu adalah ahli patologi tanaman padi. Analisa gambar daun padi ini dengan teliti.
 
@@ -46,7 +54,7 @@ Aturan:
     {
         $model = $model ?? $this->defaultModel;
 
-        $systemContent = $this->systemPrompt;
+        $systemContent = $this->getSystemPrompt();
         if ($diseaseContext && $diseaseContext !== 'Konsultasi Umum') {
             $systemContent .= "\n\nKonteks saat ini: User sedang mendiskusikan penyakit padi '{$diseaseContext}'. Berikan informasi yang relevan.";
         }
@@ -68,7 +76,7 @@ Aturan:
         $model = $model ?? config('services.groq.vision_model', 'meta-llama/llama-4-scout-17b-16e-instruct');
 
         $messages = [
-            ['role' => 'system', 'content' => $this->systemPrompt],
+            ['role' => 'system', 'content' => $this->getSystemPrompt()],
             [
                 'role' => 'user',
                 'content' => [
@@ -114,7 +122,7 @@ Aturan:
         $userMessage = "Berikut adalah konten teks dari artikel URL: {$url}\n\n[MULAI KONTEN]\n{$textContent}\n[AKHIR KONTEN]\n\nInstruksi User: {$message}";
 
         $messages = [
-            ['role' => 'system', 'content' => $this->systemPrompt . "\n\nINSTRUKSI KHUSUS (RAG MODE):\nUser memberikan teks artikel dari URL. Tugas Anda adalah mengekstrak informasi dengan sangat teliti, seperti 'Detektif Data'.\n\nATURAN RAG:\n1. Jawab HANYA berdasarkan informasi yang ada di [MULAI KONTEN] sampai [AKHIR KONTEN].\n2. Cek setiap kalimat. Jangan lewatkan detail kecil seperti nama ilmiah (biasanya italic/kurung), persentase angka, atau dosis obat.\n3. Jika tertulis 'Rhizoctonia solani', 'Xanthomonas', atau angka '40%', '25%', WAJIB DISEBUTKAN.\n4. Jika informasi benar-benar tidak ada di teks, katakan jujur: 'Maaf, informasi spesifik tersebut tidak ditemukan dalam artikel ini, namun secara umum...'."],
+            ['role' => 'system', 'content' => $this->getSystemPrompt() . "\n\nINSTRUKSI KHUSUS (RAG MODE):\nUser memberikan teks artikel dari URL. Tugas Anda adalah mengekstrak informasi dengan sangat teliti, seperti 'Detektif Data'.\n\nATURAN RAG:\n1. Jawab HANYA berdasarkan informasi yang ada di [MULAI KONTEN] sampai [AKHIR KONTEN].\n2. Cek setiap kalimat. Jangan lewatkan detail kecil seperti nama ilmiah (biasanya italic/kurung), persentase angka, atau dosis obat.\n3. Jika tertulis 'Rhizoctonia solani', 'Xanthomonas', atau angka '40%', '25%', WAJIB DISEBUTKAN.\n4. Jika informasi benar-benar tidak ada di teks, katakan jujur: 'Maaf, informasi spesifik tersebut tidak ditemukan dalam artikel ini, namun secara umum...'."],
             ['role' => 'user', 'content' => $userMessage],
         ];
 

@@ -142,7 +142,7 @@
                         <button type="submit" id="btnDiagnosa"
                             class="w-full bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-4 rounded-2xl transition shadow-lg hover:shadow-green-500/30 flex justify-center items-center gap-3 active:scale-95 text-lg">
                             <i class="fa-solid fa-magnifying-glass-chart"></i>
-                            <span>Mulai Cek Penyakit</span>
+                            <span>Cek Kesehatan Padi Anda</span>
                         </button>
                     </form>
 
@@ -306,10 +306,12 @@
         const URL_UPLOAD = "{{ route('analyze') }}";
         const URL_CHAT = "{{ route('chat.send') }}";
         const URL_HEALTH = "{{ url('/health') }}";
+        const CHAT_CONVERSATION_KEY = 'pohaci_chat_conversation_id';
 
         let currentDisease = "Konsultasi Umum";
         let attachedFile = null;
         let attachedUrl = null;
+        let currentConversationId = localStorage.getItem(CHAT_CONVERSATION_KEY) || '';
         const mobileSidebar = document.getElementById('mobileSidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
 
@@ -523,6 +525,8 @@
                 document.getElementById('uploadPrompt').classList.remove('hidden');
                 document.getElementById('resultSection').classList.add('hidden');
                 currentDisease = "Konsultasi Umum";
+                currentConversationId = '';
+                localStorage.removeItem(CHAT_CONVERSATION_KEY);
                 const history = document.getElementById('chatHistory');
                 history.innerHTML = `
                     <div class="flex gap-3 animate-fade-in-up">
@@ -653,8 +657,15 @@
                     if (attachedUrl) {
                         formData.append('url', attachedUrl);
                     }
+                    if (currentConversationId) {
+                        formData.append('conversation_id', currentConversationId);
+                    }
 
                     const response = await axios.post(URL_CHAT, formData);
+                    if (response.data?.conversation_id) {
+                        currentConversationId = String(response.data.conversation_id);
+                        localStorage.setItem(CHAT_CONVERSATION_KEY, currentConversationId);
+                    }
                     const jawabanRapi = formatText(response.data.answer);
                     const modelUsed = response.data.model_used || '';
                     const typeIcon = response.data.type === 'vision' ? '👁️' : response.data.type === 'url' ? '🔗' : '💬';

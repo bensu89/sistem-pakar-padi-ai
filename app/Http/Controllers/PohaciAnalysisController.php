@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PohaciConversation;
 use App\Models\PohaciLocation;
 use App\Models\PohaciMessage;
+use App\Models\PohaciMonitoring;
 use App\Models\PohaciRecommendation;
 use App\Models\PohaciSatelliteObservation;
 use App\Services\GroqService;
@@ -13,7 +14,10 @@ use Symfony\Component\Process\Process;
 
 class PohaciAnalysisController extends Controller
 {
-    public function __construct(protected GroqService $groq)
+    public function __construct(
+        protected GroqService $groq,
+        protected \App\Services\SupabaseStorageService $supabase
+    )
     {
     }
 
@@ -31,6 +35,9 @@ class PohaciAnalysisController extends Controller
         if (empty($validated['message']) && !$request->hasFile('file')) {
             return response()->json(['error' => 'Pesan atau foto harus diisi.'], 422);
         }
+
+        $file = $request->file('file');
+        $publicUrl = $file ? $this->storeImage($file, 'monitoring') : null;
 
         $conversation = isset($validated['conversation_id'])
             ? PohaciConversation::findOrFail($validated['conversation_id'])
@@ -55,7 +62,6 @@ class PohaciAnalysisController extends Controller
         ];
 
         $userMessage = PohaciMessage::create($messagePayload);
-        $file = $request->file('file');
         $coordinates = $this->resolveCoordinates($request, $file);
         $mode = 'standard';
         $spatialPayload = null;
@@ -124,6 +130,32 @@ class PohaciAnalysisController extends Controller
                 'mode' => $mode,
                 'spatial_error' => $spatialError,
                 'spatial' => $spatialPayload,
+            ],
+        ]);
+
+        PohaciMonitoring::create([
+            'user_id' => $request->user()?->id,
+            'reporter_name' => $request->user()?->name ?? 'Pengguna Umum',
+            'reporter_email' => $request->user()?->email ?? null,
+            'image_path' => $publicUrl,
+            'latitude' => $location?->latitude,
+            'longitude' => $location?->longitude,
+            'coordinate_source' => $location?->source ?? 'none',
+            'location_label' => $validated['location_hint'] ?? null,
+            'disease_name' => data_get($spatialPayload, 'data.NDVI') !== null ? 'Analisa Spasial' : 'Analisa Umum',
+            'confidence' => null,
+            'solution' => $answer,
+            'ndvi_value' => data_get($spatialPayload, 'data.NDVI'),
+            'satellite_source' => data_get($spatialPayload, 'satellite'),
+            'analysis_mode' => $mode,
+            'recommendation' => $answer,
+            'followup_status' => 'pending',
+            'raw_payload' => [
+                'conversation_id' => $conversation->id,
+                'message_id' => $userMessage->id,
+                'location' => $location,
+                'spatial' => $spatialPayload,
+                'spatial_error' => $spatialError,
             ],
         ]);
 
@@ -242,6 +274,20 @@ class PohaciAnalysisController extends Controller
         }
 
         return $decimal;
+    }
+
+    protected function storeImage($file, string $folder): ?string
+    {
+        $publicUrl = $this->supabase->upload($file, $folder);
+
+        if ($publicUrl) {
+            return $publicUrl;
+        }
+
+        $filename = 'temp_' . time() . '.' . $file->getClientOriginalExtension();
+        $path = $file->storeAs('uploads', $filename, 'public');
+
+        return 'storage/' . $path;
     }
 
     protected function gpsValueToFloat($value): float

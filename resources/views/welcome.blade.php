@@ -58,10 +58,8 @@
                 <!-- CTA Button -->
                 <div class="hidden md:flex items-center gap-4">
                     @auth
-                        @if(auth()->user()->is_admin)
-                            <a href="{{ route('admin.index') }}"
-                                class="text-gray-600 hover:text-green-600 font-medium text-sm">Dashboard Admin</a>
-                        @endif
+                        <a href="{{ route('admin.index') }}"
+                            class="text-gray-600 hover:text-green-600 font-medium text-sm">Dashboard</a>
                     @else
                         <a href="{{ route('login') }}" class="text-gray-600 hover:text-green-600 font-medium text-sm">Masuk
                             Admin</a>
@@ -107,12 +105,10 @@
             <!-- Auth Links -->
             <div class="pt-4 border-t border-gray-200 space-y-2">
                 @auth
-                    @if(auth()->user()->is_admin)
-                        <a href="{{ route('admin.index') }}"
-                            class="px-4 py-2 rounded-lg text-gray-700 hover:text-green-600 hover:bg-gray-100 font-medium transition">
-                            <i class="fa-solid fa-gauge-high mr-2"></i>Dashboard Admin
-                        </a>
-                    @endif
+                    <a href="{{ route('admin.index') }}"
+                        class="px-4 py-2 rounded-lg text-gray-700 hover:text-green-600 hover:bg-gray-100 font-medium transition">
+                        <i class="fa-solid fa-gauge-high mr-2"></i>Dashboard
+                    </a>
                 @else
                     <a href="{{ route('login') }}"
                         class="px-4 py-2 rounded-lg text-gray-700 hover:text-green-600 hover:bg-gray-100 font-medium transition">
