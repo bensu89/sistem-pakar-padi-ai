@@ -43,4 +43,9 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URL'),
     ],
 
+    'gee' => [
+        'client_email' => env('GEE_CLIENT_EMAIL'),
+        'private_key' => env('GEE_PRIVATE_KEY'),
+    ],
+
 ];
