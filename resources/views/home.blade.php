@@ -83,103 +83,155 @@
     </style>
 </head>
 
-<body
-    class="bg-gray-100 min-h-screen md:h-screen w-screen md:overflow-hidden flex items-center justify-center p-4 relative">
+<body class="bg-gray-100 min-h-screen w-screen md:overflow-hidden p-4">
 
     <div
-        class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-auto md:h-[90vh] flex flex-col overflow-hidden relative">
+        class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-auto md:h-[90vh] flex flex-col md:flex-row overflow-hidden relative mx-auto">
 
-        <!-- ========== PANEL CHATBOT ========== -->
-        <div class="w-full bg-white flex flex-col h-[85vh] md:h-full relative z-10">
-
-            <!-- Header Chat -->
-            <div class="p-4 border-b flex items-center justify-between bg-white z-10 shadow-sm">
+        <!-- ========== SIDEBAR ========== -->
+        <aside id="mobileSidebar"
+            class="hidden fixed inset-x-0 bottom-0 z-40 w-full max-h-[78vh] translate-y-full transition-transform duration-300 md:static md:translate-y-0 md:z-auto md:w-[360px] md:flex border-r border-b md:border-b-0 bg-gradient-to-b from-green-50 to-white flex-col overflow-y-auto rounded-t-3xl md:rounded-none shadow-2xl md:shadow-none">
+            <div class="p-4 border-b bg-white/80 backdrop-blur flex items-center justify-between sticky top-0 z-10">
                 <div class="flex items-center gap-3">
                     <div class="bg-blue-100 w-10 h-10 rounded-full flex items-center justify-center">
                         <i class="fa-solid fa-user-doctor text-blue-600"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-gray-800 text-sm">Pohaci AI: Ngariksa Pare, Ngajaga Lemah Cai</h3>
+                        <h3 class="font-bold text-gray-800 text-sm">Pohaci AI</h3>
+                        <p id="apiStatusBadge" class="text-xs flex items-center gap-1 text-gray-500">
+                            <span id="apiStatusDot" class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                            <span id="apiStatusText">Memeriksa...</span>
+                        </p>
+                    </div>
+                </div>
+                @auth
+                    <a href="{{ route('admin.index') }}"
+                        class="bg-white text-gray-700 hover:text-green-600 px-3 py-1.5 rounded-lg shadow-sm font-bold text-xs flex items-center gap-2 transition hover:shadow-md border border-gray-200">
+                        <i class="fa-solid fa-gauge-high"></i> Dashboard
+                    </a>
+                @else
+                    <a href="{{ route('login') }}"
+                        class="bg-white/80 backdrop-blur text-gray-500 hover:text-blue-600 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition hover:bg-white hover:shadow-sm border border-transparent hover:border-blue-100">
+                        <i class="fa-solid fa-lock"></i> Admin Login
+                    </a>
+                @endauth
+            </div>
+
+            <div class="p-4 space-y-4 overflow-y-auto">
+                <div class="bg-gradient-to-br from-green-50 via-white to-emerald-50 rounded-2xl border border-green-100 p-4 shadow-sm">
+                    <p class="text-xs uppercase tracking-[0.2em] text-green-600 font-semibold">Diagnosa Foto</p>
+                    <h2 class="text-lg font-bold text-gray-800 mt-1">Ambil / Upload Foto langsung dari chat</h2>
+                    <p class="text-sm text-gray-500">Pilih dari kamera atau galeri, lalu cek penyakitnya di sini.</p>
+
+                    <form id="uploadForm" class="space-y-3 mt-4">
+                        <label for="imageInput"
+                            class="border-2 border-dashed border-green-300 rounded-2xl bg-white/90 hover:bg-green-50 transition cursor-pointer relative min-h-[12rem] flex flex-col justify-center items-center group overflow-hidden shadow-inner">
+                            <input type="file" id="imageInput" name="image" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                accept="image/*" capture="environment" required>
+                            <div id="previewContainer" class="hidden w-full h-full absolute inset-0 bg-white">
+                                <img id="imagePreview" src="" class="w-full h-full object-contain p-2">
+                            </div>
+                            <div id="uploadPrompt" class="group-hover:scale-105 transition duration-300 text-center p-6">
+                                <div class="bg-white p-5 rounded-full shadow-md inline-block mb-4">
+                                    <i class="fa-solid fa-camera text-4xl text-green-600"></i>
+                                </div>
+                                <p class="text-gray-700 font-bold text-lg">Ambil / Upload Foto</p>
+                                <p class="text-gray-500 text-sm mt-1">Pastikan bagian daun terlihat jelas</p>
+                            </div>
+                        </label>
+                        <button type="submit" id="btnDiagnosa"
+                            class="w-full bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-4 rounded-2xl transition shadow-lg hover:shadow-green-500/30 flex justify-center items-center gap-3 active:scale-95 text-lg">
+                            <i class="fa-solid fa-magnifying-glass-chart"></i>
+                            <span>Mulai Cek Penyakit</span>
+                        </button>
+                    </form>
+
+                    <div id="resultSection"
+                        class="hidden mt-3 bg-green-50 rounded-xl border border-green-200 p-4 animate-fade-in-up">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Terdeteksi:</p>
+                                <h3 id="resDisease" class="text-lg font-bold text-gray-800 capitalize leading-tight">Nama
+                                    Penyakit</h3>
+                            </div>
+                            <span id="resConfidenceText"
+                                class="text-xs bg-green-600 text-white px-2 py-1 rounded font-bold shadow-sm">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+                            <div id="resConfidenceBar" class="bg-green-500 h-1.5 rounded-full transition-all duration-1000"
+                                style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-xs uppercase tracking-[0.2em] text-gray-500 font-semibold">Aksi Cepat</p>
+                        <button type="button" onclick="toggleQuickActions(event)"
+                            class="md:hidden text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded-full">
+                            Buka
+                        </button>
+                    </div>
+                    <div id="quickActionsPanel" class="hidden md:block">
+                        <div id="quickActions" class="flex md:flex-wrap gap-2 overflow-x-auto md:overflow-visible no-scrollbar pb-1">
+                        <button onclick="fillChat('Cara mengatasi hama wereng coklat?')"
+                            class="bg-white border border-green-200 text-green-700 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-green-50 transition shadow-sm">
+                            🦠 Hama Wereng
+                        </button>
+                        <button onclick="fillChat('Rekomendasi pupuk untuk padi usia 30 hari?')"
+                            class="bg-white border border-blue-200 text-blue-700 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-blue-50 transition shadow-sm">
+                            💊 Rekomendasi Pupuk
+                        </button>
+                        <button onclick="fillChat('Penyakit apa yang membuat daun padi menguning?')"
+                            class="bg-white border border-yellow-200 text-yellow-700 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-yellow-50 transition shadow-sm">
+                            🍂 Daun Menguning
+                        </button>
+                        <button onclick="fillChat('Cara mencegah penyakit blas pada padi?')"
+                            class="bg-white border border-red-200 text-red-700 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-red-50 transition shadow-sm">
+                            🍄 Pencegahan Blas
+                        </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ========== PANEL CHATBOT ========== -->
+        <div class="w-full flex flex-col flex-1 min-h-[70vh] md:h-full relative z-10">
+
+            <!-- Header Chat -->
+            <div class="p-4 border-b flex items-center justify-between bg-white z-10 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <button type="button" onclick="toggleSidebar()"
+                        class="md:hidden bg-green-50 text-green-700 w-10 h-10 rounded-full flex items-center justify-center border border-green-200">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="bg-blue-100 w-10 h-10 rounded-full flex items-center justify-center">
+                        <i class="fa-solid fa-comments text-blue-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-sm">Chat Pohaci AI</h3>
                         <p class="text-xs text-green-600 flex items-center gap-1">
                             <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> Online
                         </p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <!-- Topic Badge -->
-                    <div
-                        class="text-xs text-gray-500 border px-3 py-1 rounded-full bg-gray-50 max-w-[150px] truncate flex items-center gap-1 hidden md:flex">
-                        Topik: <span id="chatContextDisease" class="font-bold text-gray-700">Umum</span>
-                    </div>
-                    @auth
-                        @if(auth()->user()->is_admin)
-                            <a href="{{ route('admin.index') }}"
-                                class="bg-white text-gray-700 hover:text-green-600 px-3 py-1.5 rounded-lg shadow-sm font-bold text-xs flex items-center gap-2 transition hover:shadow-md border border-gray-200">
-                                <i class="fa-solid fa-gauge-high"></i> Dashboard Admin
-                            </a>
-                        @endif
-                    @else
-                        <a href="{{ route('login') }}"
-                            class="bg-white/80 backdrop-blur text-gray-500 hover:text-blue-600 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition hover:bg-white hover:shadow-sm border border-transparent hover:border-blue-100">
-                            <i class="fa-solid fa-lock"></i> Admin Login
-                        </a>
-                    @endauth
+                    <button type="button" onclick="openSidebar()"
+                        class="md:hidden bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-camera"></i>
+                        Diagnosa Foto
+                    </button>
+                    <button type="button" onclick="toggleQuickActions(event)"
+                        class="md:hidden bg-white text-green-700 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm border border-green-200">
+                        <i class="fa-solid fa-bolt"></i>
+                        Aksi Cepat
+                    </button>
                     <button type="button" onclick="resetApp()"
                         class="text-gray-400 hover:text-red-500 transition text-xs flex items-center gap-1 border border-gray-300 px-2 py-1.5 rounded-full bg-white hover:border-red-400 hover:bg-red-50 tooltip"
                         data-tip="Reset Semua">
                         <i class="fa-solid fa-arrows-rotate"></i>
                     </button>
-                </div>
-            </div>
-
-            <!-- ========== DIAGNOSA FOTO DI DALAM CHAT ========== -->
-            <div class="p-4 border-b bg-gradient-to-br from-green-50 via-white to-emerald-50">
-                <div class="flex items-start justify-between gap-4 mb-3">
-                    <div>
-                        <p class="text-xs uppercase tracking-[0.2em] text-green-600 font-semibold">Diagnosa Foto</p>
-                        <h2 class="text-lg font-bold text-gray-800 mt-1">Ambil / Upload Foto langsung dari chat</h2>
-                        <p class="text-sm text-gray-500">Pilih dari kamera atau galeri, lalu cek penyakitnya di sini.</p>
-                    </div>
-                </div>
-
-                <form id="uploadForm" class="space-y-3">
-                    <label for="imageInput"
-                        class="border-2 border-dashed border-green-300 rounded-2xl bg-white/90 hover:bg-green-50 transition cursor-pointer relative min-h-[12rem] flex flex-col justify-center items-center group overflow-hidden shadow-inner">
-                        <input type="file" id="imageInput" name="image" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                            accept="image/*" capture="environment" required>
-                        <div id="previewContainer" class="hidden w-full h-full absolute inset-0 bg-white">
-                            <img id="imagePreview" src="" class="w-full h-full object-contain p-2">
-                        </div>
-                        <div id="uploadPrompt" class="group-hover:scale-105 transition duration-300 text-center p-6">
-                            <div class="bg-white p-5 rounded-full shadow-md inline-block mb-4">
-                                <i class="fa-solid fa-camera text-4xl text-green-600"></i>
-                            </div>
-                            <p class="text-gray-700 font-bold text-lg">Ambil / Upload Foto</p>
-                            <p class="text-gray-500 text-sm mt-1">Pastikan bagian daun terlihat jelas</p>
-                        </div>
-                    </label>
-                    <button type="submit" id="btnDiagnosa"
-                        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-4 rounded-2xl transition shadow-lg hover:shadow-green-500/30 flex justify-center items-center gap-3 active:scale-95 text-lg">
-                        <i class="fa-solid fa-magnifying-glass-chart"></i>
-                        <span>Mulai Cek Penyakit</span>
-                    </button>
-                </form>
-
-                <div id="resultSection"
-                    class="hidden mt-3 bg-green-50 rounded-xl border border-green-200 p-4 animate-fade-in-up">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Terdeteksi:</p>
-                            <h3 id="resDisease" class="text-lg font-bold text-gray-800 capitalize leading-tight">Nama
-                                Penyakit</h3>
-                        </div>
-                        <span id="resConfidenceText"
-                            class="text-xs bg-green-600 text-white px-2 py-1 rounded font-bold shadow-sm">0%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2">
-                        <div id="resConfidenceBar" class="bg-green-500 h-1.5 rounded-full transition-all duration-1000"
-                            style="width: 0%"></div>
-                    </div>
                 </div>
             </div>
 
@@ -192,9 +244,9 @@
                     <div
                         class="bg-white px-4 py-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-700 max-w-[90%] border border-gray-100 leading-relaxed">
                         Halo! Saya <b>Pohaci AI</b>, asisten pakar padi Anda. 🌱<br><br>
-                        📸 <b>Upload Foto</b> di kartu atas untuk diagnosa penyakit<br>
                         💬 <b>Ketik Pertanyaan</b> di bawah untuk konsultasi<br>
-                        🔗 <b>Paste URL</b> untuk analisa konten halaman web
+                        🔗 <b>Paste URL</b> untuk analisa konten halaman web<br>
+                        📸 <b>Upload Foto</b> gunakan sidebar di kiri
                     </div>
                 </div>
             </div>
@@ -232,26 +284,6 @@
                         <i class="fa-solid fa-xmark text-xs"></i>
                     </button>
                 </div>
-            </div>
-
-            <!-- Quick Actions Chips -->
-            <div id="quickActions" class="px-4 pb-2 flex gap-2 overflow-x-auto no-scrollbar mask-gradient">
-                <button onclick="fillChat('Cara mengatasi hama wereng coklat?')"
-                    class="flex-shrink-0 bg-white border border-green-200 text-green-700 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-green-50 transition shadow-sm whitespace-nowrap">
-                    🦠 Hama Wereng
-                </button>
-                <button onclick="fillChat('Rekomendasi pupuk untuk padi usia 30 hari?')"
-                    class="flex-shrink-0 bg-white border border-blue-200 text-blue-700 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-blue-50 transition shadow-sm whitespace-nowrap">
-                    💊 Rekomendasi Pupuk
-                </button>
-                <button onclick="fillChat('Penyakit apa yang membuat daun padi menguning?')"
-                    class="flex-shrink-0 bg-white border border-yellow-200 text-yellow-700 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-yellow-50 transition shadow-sm whitespace-nowrap">
-                    🍂 Daun Menguning
-                </button>
-                <button onclick="fillChat('Cara mencegah penyakit blas pada padi?')"
-                    class="flex-shrink-0 bg-white border border-red-200 text-red-700 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-red-50 transition shadow-sm whitespace-nowrap">
-                    🍄 Pencegahan Blas
-                </button>
             </div>
 
             <!-- URL Input Bar (hidden by default) -->
@@ -296,6 +328,8 @@
                 </div>
             </div>
         </div>
+
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 z-30 hidden md:hidden" onclick="closeSidebar()"></div>
     </div>
 
     <script>
@@ -304,10 +338,13 @@
 
         const URL_UPLOAD = "{{ route('analyze') }}";
         const URL_CHAT = "{{ route('chat.send') }}";
+        const URL_HEALTH = "{{ url('/api/pohaci/health') }}";
 
         let currentDisease = "Konsultasi Umum";
         let attachedFile = null;
         let attachedUrl = null;
+        const mobileSidebar = document.getElementById('mobileSidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
 
         // --- ESCAPE HTML (XSS prevention) ---
         function escapeHtml(text) {
@@ -325,6 +362,89 @@
             return formatted;
         }
 
+        function setApiStatus(state, text) {
+            const badge = document.getElementById('apiStatusBadge');
+            const dot = document.getElementById('apiStatusDot');
+            const label = document.getElementById('apiStatusText');
+
+            if (!badge || !dot || !label) return;
+
+            const styles = {
+                ok: ['text-green-600', 'bg-green-500', 'Online'],
+                degraded: ['text-amber-600', 'bg-amber-500', 'Terbatas'],
+                error: ['text-red-600', 'bg-red-500', 'Offline'],
+                loading: ['text-gray-500', 'bg-gray-400', 'Memeriksa...'],
+            };
+
+            const [textClass, dotClass, fallbackText] = styles[state] || styles.loading;
+            badge.className = `text-xs flex items-center gap-1 ${textClass}`;
+            dot.className = `w-1.5 h-1.5 rounded-full ${dotClass}`;
+            label.textContent = text || fallbackText;
+        }
+
+        function openSidebar() {
+            if (!mobileSidebar || !sidebarOverlay) return;
+            mobileSidebar.classList.remove('hidden');
+            mobileSidebar.classList.add('flex');
+            mobileSidebar.classList.remove('translate-y-full');
+            mobileSidebar.classList.add('translate-y-0');
+            sidebarOverlay.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function closeSidebar() {
+            if (!mobileSidebar || !sidebarOverlay) return;
+            mobileSidebar.classList.add('translate-y-full');
+            mobileSidebar.classList.remove('translate-y-0');
+            mobileSidebar.classList.remove('flex');
+            mobileSidebar.classList.add('hidden');
+            sidebarOverlay.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        function toggleSidebar() {
+            if (!mobileSidebar) return;
+            if (mobileSidebar.classList.contains('translate-y-full')) {
+                openSidebar();
+            } else {
+                closeSidebar();
+            }
+        }
+
+        function toggleQuickActions(evt) {
+            const panel = document.getElementById('quickActionsPanel');
+            const button = evt?.currentTarget;
+            if (!panel) return;
+
+            panel.classList.toggle('hidden');
+            if (button) {
+                button.textContent = panel.classList.contains('hidden') ? 'Buka' : 'Tutup';
+            }
+        }
+
+        async function checkApiHealth() {
+            setApiStatus('loading');
+
+            try {
+                const response = await axios.get(URL_HEALTH, { timeout: 5000 });
+                const status = response.data?.status || 'error';
+
+                if (status === 'ok') {
+                    setApiStatus('ok', 'Online');
+                    return;
+                }
+
+                if (status === 'degraded') {
+                    setApiStatus('degraded', 'Terbatas');
+                    return;
+                }
+
+                setApiStatus('error', 'Offline');
+            } catch (error) {
+                setApiStatus('error', 'Offline');
+            }
+        }
+
         function renderDiagnosisResult(data) {
             document.getElementById('resultSection').classList.remove('hidden');
             document.getElementById('resDisease').innerText = data.disease_name;
@@ -332,7 +452,6 @@
             document.getElementById('resConfidenceText').innerText = data.confidence + "%";
 
             currentDisease = data.disease_name;
-            document.getElementById('chatContextDisease').innerText = currentDisease;
 
             const analisaRapi = formatText(data.solution);
             addBotMessage(`💡 <b>Hasil Diagnosa (${data.confidence}%):</b><br><br>${analisaRapi}`);
@@ -441,7 +560,6 @@
                 document.getElementById('uploadPrompt').classList.remove('hidden');
                 document.getElementById('resultSection').classList.add('hidden');
                 currentDisease = "Konsultasi Umum";
-                document.getElementById('chatContextDisease').innerText = currentDisease;
                 const history = document.getElementById('chatHistory');
                 history.innerHTML = `
                     <div class="flex gap-3 animate-fade-in-up">
@@ -450,7 +568,7 @@
                         </div>
                         <div class="bg-white px-4 py-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-700 max-w-[90%] border border-gray-100 leading-relaxed">
                             Halo! Saya <b>Pohaci AI</b>, asisten pakar padi Anda. 🌱<br><br>
-                            📸 <b>Upload Foto</b> di kartu atas untuk diagnosa penyakit<br>
+                            📸 <b>Upload Foto</b> gunakan sidebar di kiri<br>
                             💬 <b>Ketik Pertanyaan</b> di bawah untuk konsultasi<br>
                             🔗 <b>Paste URL</b> untuk analisa konten halaman web
                         </div>
@@ -514,6 +632,9 @@
                 btn.disabled = false;
             }
         });
+
+        checkApiHealth();
+        setInterval(checkApiHealth, 60000);
 
         // ============================================================
         // 2. CHATBOT (Text / File / URL → Laravel → Groq)
