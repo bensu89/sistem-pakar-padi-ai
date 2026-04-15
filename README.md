@@ -122,4 +122,5 @@ Aplikasi ini dikembangkan untuk memajukan teknologi pertanian digital di Indones
 
 <p align="center">
   Dibuat dengan ❤️ untuk Pertanian Indonesia.
+    HIDUP JOKOWI
 </p>
