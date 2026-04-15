@@ -55,7 +55,8 @@ class ChatController extends Controller
                 $messageMetadata['filename'] = $file->getClientOriginalName();
                 $messageMetadata['has_file'] = true;
                 $userMessage = $this->storeMessage($conversation, 'farmer', $userContent, true, $messageMetadata);
-                $answer = $this->groq->chatWithImage($message, $base64, $mimeType);
+                $conversationContext = $this->buildConversationContext($conversation, $userMessage->id);
+                $answer = $this->groq->chatWithImage($message, $base64, $mimeType, null, $conversationContext);
                 $aiMessage = $this->storeMessage($conversation, 'ai', $answer, false, [
                     'type' => $messageType,
                     'source_message_id' => $userMessage->id,
@@ -83,7 +84,8 @@ class ChatController extends Controller
                 $messageMetadata['url'] = $url;
                 $messageMetadata['has_url'] = true;
                 $userMessage = $this->storeMessage($conversation, 'farmer', $userContent, false, $messageMetadata);
-                $answer = $this->groq->chatWithUrl($message, $url);
+                $conversationContext = $this->buildConversationContext($conversation, $userMessage->id);
+                $answer = $this->groq->chatWithUrl($message, $url, null, $conversationContext);
                 $aiMessage = $this->storeMessage($conversation, 'ai', $answer, false, [
                     'type' => $messageType,
                     'source_message_id' => $userMessage->id,
@@ -105,7 +107,8 @@ class ChatController extends Controller
 
             $messageMetadata['has_text'] = true;
             $userMessage = $this->storeMessage($conversation, 'farmer', $userContent, false, $messageMetadata);
-            $answer = $this->groq->chat($message, null, $diseaseContext);
+            $conversationContext = $this->buildConversationContext($conversation, $userMessage->id);
+            $answer = $this->groq->chat($message, null, $diseaseContext, $conversationContext);
             $aiMessage = $this->storeMessage($conversation, 'ai', $answer, false, [
                 'type' => $messageType,
                 'source_message_id' => $userMessage->id,
@@ -155,5 +158,33 @@ class ChatController extends Controller
                 'metadata' => $metadata,
             ]);
         });
+    }
+
+    protected function buildConversationContext(PohaciConversation $conversation, ?int $skipMessageId = null, int $limit = 10): ?string
+    {
+        $messages = PohaciMessage::query()
+            ->where('conversation_id', $conversation->id)
+            ->when($skipMessageId, function ($query) use ($skipMessageId) {
+                $query->where('id', '<=', $skipMessageId);
+            })
+            ->orderByDesc('id')
+            ->limit($limit)
+            ->get()
+            ->reverse()
+            ->values();
+
+        if ($messages->isEmpty()) {
+            return null;
+        }
+
+        $lines = $messages->map(function (PohaciMessage $message) {
+            $role = $message->sender_type === 'ai' ? 'AI' : 'User';
+            $content = trim(preg_replace('/\s+/', ' ', strip_tags((string) $message->content)));
+            $content = mb_substr($content, 0, 1000);
+
+            return "{$role}: {$content}";
+        })->all();
+
+        return implode("\n", $lines);
     }
 }

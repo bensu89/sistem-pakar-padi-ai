@@ -77,6 +77,7 @@ DB_PASSWORD=
 
 GROQ_API_KEY=gsk_...
 GROQ_DEFAULT_MODEL=llama-3.1-8b-instant
+GROQ_REASONING_MODEL=llama-3.3-70b-versatile
 GROQ_VISION_MODEL=llama-4-scout-17b-16e-instruct
 
 GEE_CLIENT_EMAIL=...
@@ -107,11 +108,12 @@ Buka `http://localhost:8000`
    - `APP_KEY`
    - `APP_DEBUG=false`
    - `APP_URL`
-   - `GROQ_API_KEY`
-   - `GROQ_DEFAULT_MODEL`
-   - `GROQ_VISION_MODEL`
-   - `GEE_CLIENT_EMAIL`
-   - `GEE_PRIVATE_KEY`
+- `GROQ_API_KEY`
+- `GROQ_DEFAULT_MODEL`
+- `GROQ_REASONING_MODEL`
+- `GROQ_VISION_MODEL`
+- `GEE_CLIENT_EMAIL`
+- `GEE_PRIVATE_KEY`
 4. Redeploy jika ada perubahan kode.
 
 ## 🤝 Kontribusi & Credits

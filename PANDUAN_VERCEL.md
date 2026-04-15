@@ -85,10 +85,11 @@ Di halaman konfigurasi Vercel, masukkan variable berikut:
 | `DB_HOST` | `aws-1-ap-southeast-1.pooler.supabase.com` |
 | `DB_PORT` | `6543` |
 | `DB_DATABASE` | `postgres` |
-| `DB_USERNAME` | `postgres.zhphdbdhzadgvtbtjykr` |
-| `DB_PASSWORD` | `Gtqt8TqRVxJ0QQJD` |
+| `DB_USERNAME` | (isi dari Supabase) |
+| `DB_PASSWORD` | (isi dari Supabase/Vercel secret) |
 | `GROQ_API_KEY` | (Copy dari .env) |
 | `GROQ_DEFAULT_MODEL` | `llama-3.1-8b-instant` |
+| `GROQ_REASONING_MODEL` | `llama-3.3-70b-versatile` |
 | `GROQ_VISION_MODEL` | `meta-llama/llama-4-scout-17b-16e-instruct` |
 | `LOG_CHANNEL` | `stderr` |
 

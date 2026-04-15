@@ -11,6 +11,7 @@ class GroqService
     protected string $apiKey;
     protected string $baseUrl;
     protected string $defaultModel;
+    protected string $reasoningModel;
 
     // System prompt khusus pakar padi
     protected string $systemPrompt = 'Kamu adalah "Pohaci AI", asisten pakar pertanian padi Indonesia. 
@@ -45,18 +46,22 @@ Aturan:
         $this->apiKey = config('services.groq.api_key');
         $this->baseUrl = config('services.groq.base_url');
         $this->defaultModel = config('services.groq.default_model');
+        $this->reasoningModel = config('services.groq.reasoning_model', $this->defaultModel);
     }
 
     /**
      * Chat text biasa (tanpa gambar)
      */
-    public function chat(string $message, ?string $model = null, ?string $diseaseContext = null): string
+    public function chat(string $message, ?string $model = null, ?string $diseaseContext = null, ?string $conversationContext = null): string
     {
-        $model = $model ?? $this->defaultModel;
+        $model = $model ?? $this->selectTextModel($message, $diseaseContext, $conversationContext);
 
         $systemContent = $this->getSystemPrompt();
         if ($diseaseContext && $diseaseContext !== 'Konsultasi Umum') {
             $systemContent .= "\n\nKonteks saat ini: User sedang mendiskusikan penyakit padi '{$diseaseContext}'. Berikan informasi yang relevan.";
+        }
+        if ($conversationContext) {
+            $systemContent .= "\n\n[Riwayat Percakapan]\n{$conversationContext}";
         }
 
         $messages = [
@@ -70,13 +75,18 @@ Aturan:
     /**
      * Chat dengan gambar (vision model)
      */
-    public function chatWithImage(string $message, string $base64Image, string $mimeType = 'image/jpeg', ?string $model = null): string
+    public function chatWithImage(string $message, string $base64Image, string $mimeType = 'image/jpeg', ?string $model = null, ?string $conversationContext = null): string
     {
         // Use configured vision model (default: llama-4-scout)
         $model = $model ?? config('services.groq.vision_model', 'meta-llama/llama-4-scout-17b-16e-instruct');
 
+        $systemContent = $this->getSystemPrompt();
+        if ($conversationContext) {
+            $systemContent .= "\n\n[Riwayat Percakapan]\n{$conversationContext}";
+        }
+
         $messages = [
-            ['role' => 'system', 'content' => $this->getSystemPrompt()],
+            ['role' => 'system', 'content' => $systemContent],
             [
                 'role' => 'user',
                 'content' => [
@@ -103,9 +113,9 @@ Aturan:
     /**
      * Chat dengan konten URL (RAG Simple)
      */
-    public function chatWithUrl(string $message, string $url, ?string $model = null): string
+    public function chatWithUrl(string $message, string $url, ?string $model = null, ?string $conversationContext = null): string
     {
-        $model = $model ?? $this->defaultModel;
+        $model = $model ?? $this->reasoningModel;
 
         // Cache hasil scraping selama 60 menit agar tidak perlu request ulang
         $cacheKey = 'scraped_url_' . md5($url);
@@ -121,8 +131,13 @@ Aturan:
 
         $userMessage = "Berikut adalah konten teks dari artikel URL: {$url}\n\n[MULAI KONTEN]\n{$textContent}\n[AKHIR KONTEN]\n\nInstruksi User: {$message}";
 
+        $systemContent = $this->getSystemPrompt() . "\n\nINSTRUKSI KHUSUS (RAG MODE):\nUser memberikan teks artikel dari URL. Tugas Anda adalah mengekstrak informasi dengan sangat teliti, seperti 'Detektif Data'.\n\nATURAN RAG:\n1. Jawab HANYA berdasarkan informasi yang ada di [MULAI KONTEN] sampai [AKHIR KONTEN].\n2. Cek setiap kalimat. Jangan lewatkan detail kecil seperti nama ilmiah (biasanya italic/kurung), persentase angka, atau dosis obat.\n3. Jika tertulis 'Rhizoctonia solani', 'Xanthomonas', atau angka '40%', '25%', WAJIB DISEBUTKAN.\n4. Jika informasi benar-benar tidak ada di teks, katakan jujur: 'Maaf, informasi spesifik tersebut tidak ditemukan dalam artikel ini, namun secara umum...'.";
+        if ($conversationContext) {
+            $systemContent .= "\n\n[Riwayat Percakapan]\n{$conversationContext}";
+        }
+
         $messages = [
-            ['role' => 'system', 'content' => $this->getSystemPrompt() . "\n\nINSTRUKSI KHUSUS (RAG MODE):\nUser memberikan teks artikel dari URL. Tugas Anda adalah mengekstrak informasi dengan sangat teliti, seperti 'Detektif Data'.\n\nATURAN RAG:\n1. Jawab HANYA berdasarkan informasi yang ada di [MULAI KONTEN] sampai [AKHIR KONTEN].\n2. Cek setiap kalimat. Jangan lewatkan detail kecil seperti nama ilmiah (biasanya italic/kurung), persentase angka, atau dosis obat.\n3. Jika tertulis 'Rhizoctonia solani', 'Xanthomonas', atau angka '40%', '25%', WAJIB DISEBUTKAN.\n4. Jika informasi benar-benar tidak ada di teks, katakan jujur: 'Maaf, informasi spesifik tersebut tidak ditemukan dalam artikel ini, namun secara umum...'."],
+            ['role' => 'system', 'content' => $systemContent],
             ['role' => 'user', 'content' => $userMessage],
         ];
 
@@ -250,6 +265,17 @@ Aturan:
             'confidence' => 0,
             'solution' => $response,
         ];
+    }
+
+    protected function selectTextModel(string $message, ?string $diseaseContext = null, ?string $conversationContext = null): string
+    {
+        $messageLength = mb_strlen(trim($message));
+
+        if ($conversationContext || $diseaseContext || $messageLength > 240) {
+            return $this->reasoningModel;
+        }
+
+        return $this->defaultModel;
     }
 
     /**

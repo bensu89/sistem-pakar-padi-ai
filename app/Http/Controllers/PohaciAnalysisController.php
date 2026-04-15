@@ -93,7 +93,8 @@ class PohaciAnalysisController extends Controller
                     'raw_payload' => $spatialPayload,
                 ]);
 
-                $answer = $this->runSpatialAnalysis($validated['message'] ?? '', $file, $spatialPayload);
+                $conversationContext = $this->buildConversationContext($conversation, $userMessage->id);
+                $answer = $this->runSpatialAnalysis($validated['message'] ?? '', $file, $spatialPayload, $conversationContext);
                 $mode = 'spatial';
             } catch (\Throwable $e) {
                 $spatialError = $e->getMessage();
@@ -101,7 +102,8 @@ class PohaciAnalysisController extends Controller
         }
 
         if ($answer === null) {
-            $answer = $this->runStandardAnalysis($validated['message'] ?? '', $file, $validated['location_hint'] ?? null);
+            $conversationContext = $this->buildConversationContext($conversation, $userMessage->id);
+            $answer = $this->runStandardAnalysis($validated['message'] ?? '', $file, $validated['location_hint'] ?? null, $conversationContext);
             if ($coordinates && $spatialError) {
                 $mode = 'spatial_fallback';
             }
@@ -172,7 +174,7 @@ class PohaciAnalysisController extends Controller
         ]);
     }
 
-    protected function runSpatialAnalysis(string $message, $file, array $spatialPayload): string
+    protected function runSpatialAnalysis(string $message, $file, array $spatialPayload, ?string $conversationContext = null): string
     {
         $context = $this->buildSpatialContext($spatialPayload);
 
@@ -181,15 +183,15 @@ class PohaciAnalysisController extends Controller
             $mimeType = $file->getMimeType();
             $prompt = trim(($message ?: 'Analisa foto ini.') . "\n\n" . $context);
 
-            return $this->groq->chatWithImage($prompt, $base64, $mimeType);
+            return $this->groq->chatWithImage($prompt, $base64, $mimeType, null, $conversationContext);
         }
 
         $prompt = trim(($message ?: 'Analisa kondisi lahan ini.') . "\n\n" . $context);
 
-        return $this->groq->chat($prompt);
+        return $this->groq->chat($prompt, null, null, $conversationContext);
     }
 
-    protected function runStandardAnalysis(string $message, $file, ?string $locationHint = null): string
+    protected function runStandardAnalysis(string $message, $file, ?string $locationHint = null, ?string $conversationContext = null): string
     {
         if ($file) {
             $base64 = base64_encode(file_get_contents($file->getRealPath()));
@@ -200,7 +202,7 @@ class PohaciAnalysisController extends Controller
                 $prompt .= "\nLokasi yang disebutkan: {$locationHint}.";
             }
 
-            return $this->groq->chatWithImage($prompt, $base64, $mimeType);
+            return $this->groq->chatWithImage($prompt, $base64, $mimeType, null, $conversationContext);
         }
 
         $prompt = $message ?: 'Bantu analisa keluhan petani dan berikan saran agronomi umum.';
@@ -209,7 +211,35 @@ class PohaciAnalysisController extends Controller
             $prompt .= "\nLokasi yang disebutkan: {$locationHint}.";
         }
 
-        return $this->groq->chat($prompt);
+        return $this->groq->chat($prompt, null, null, $conversationContext);
+    }
+
+    protected function buildConversationContext(PohaciConversation $conversation, ?int $skipMessageId = null, int $limit = 10): ?string
+    {
+        $messages = PohaciMessage::query()
+            ->where('conversation_id', $conversation->id)
+            ->when($skipMessageId, function ($query) use ($skipMessageId) {
+                $query->where('id', '<=', $skipMessageId);
+            })
+            ->orderByDesc('id')
+            ->limit($limit)
+            ->get()
+            ->reverse()
+            ->values();
+
+        if ($messages->isEmpty()) {
+            return null;
+        }
+
+        $lines = $messages->map(function (PohaciMessage $message) {
+            $role = $message->sender_type === 'ai' ? 'AI' : 'User';
+            $content = trim(preg_replace('/\s+/', ' ', strip_tags((string) $message->content)));
+            $content = mb_substr($content, 0, 1000);
+
+            return "{$role}: {$content}";
+        })->all();
+
+        return implode("\n", $lines);
     }
 
     protected function resolveCoordinates(Request $request, $file): ?array
