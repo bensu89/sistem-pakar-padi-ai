@@ -164,31 +164,6 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
-                    <div class="flex items-center justify-between mb-2">
-                        <p class="text-xs uppercase tracking-[0.2em] text-gray-500 font-semibold">Aksi Cepat</p>
-                    </div>
-                    <div id="quickActionsPanel" class="hidden md:block">
-                        <div id="quickActions" class="flex md:flex-wrap gap-2 overflow-x-auto md:overflow-visible no-scrollbar pb-1">
-                        <button onclick="fillChat('Cara mengatasi hama wereng coklat?')"
-                            class="bg-white border border-green-200 text-green-700 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-green-50 transition shadow-sm">
-                            🦠 Hama Wereng
-                        </button>
-                        <button onclick="fillChat('Rekomendasi pupuk untuk padi usia 30 hari?')"
-                            class="bg-white border border-blue-200 text-blue-700 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-blue-50 transition shadow-sm">
-                            💊 Rekomendasi Pupuk
-                        </button>
-                        <button onclick="fillChat('Penyakit apa yang membuat daun padi menguning?')"
-                            class="bg-white border border-yellow-200 text-yellow-700 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-yellow-50 transition shadow-sm">
-                            🍂 Daun Menguning
-                        </button>
-                        <button onclick="fillChat('Cara mencegah penyakit blas pada padi?')"
-                            class="bg-white border border-red-200 text-red-700 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-red-50 transition shadow-sm">
-                            🍄 Pencegahan Blas
-                        </button>
-                        </div>
-                    </div>
-                </div>
             </div>
         </aside>
 
@@ -207,8 +182,9 @@
                     </div>
                     <div>
                         <h3 class="font-bold text-gray-800 text-sm">Chat Pohaci AI</h3>
-                        <p class="text-xs text-green-600 flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> Online
+                        <p id="apiStatusBadgeTop" class="text-xs flex items-center gap-1 text-gray-500">
+                            <span id="apiStatusDotTop" class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                            <span id="apiStatusTextTop">Memeriksa...</span>
                         </p>
                     </div>
                 </div>
@@ -354,11 +330,10 @@
         }
 
         function setApiStatus(state, text) {
-            const badge = document.getElementById('apiStatusBadge');
-            const dot = document.getElementById('apiStatusDot');
-            const label = document.getElementById('apiStatusText');
-
-            if (!badge || !dot || !label) return;
+            const targets = [
+                ['apiStatusBadge', 'apiStatusDot', 'apiStatusText'],
+                ['apiStatusBadgeTop', 'apiStatusDotTop', 'apiStatusTextTop'],
+            ];
 
             const styles = {
                 ok: ['text-green-600', 'bg-green-500', 'Online'],
@@ -368,9 +343,17 @@
             };
 
             const [textClass, dotClass, fallbackText] = styles[state] || styles.loading;
-            badge.className = `text-xs flex items-center gap-1 ${textClass}`;
-            dot.className = `w-1.5 h-1.5 rounded-full ${dotClass}`;
-            label.textContent = text || fallbackText;
+            targets.forEach(([badgeId, dotId, labelId]) => {
+                const badge = document.getElementById(badgeId);
+                const dot = document.getElementById(dotId);
+                const label = document.getElementById(labelId);
+
+                if (!badge || !dot || !label) return;
+
+                badge.className = `text-xs flex items-center gap-1 ${textClass}`;
+                dot.className = `w-1.5 h-1.5 rounded-full ${dotClass}`;
+                label.textContent = text || fallbackText;
+            });
         }
 
         function openSidebar() {
