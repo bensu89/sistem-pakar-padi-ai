@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DiagnosisController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ChatController;
+use Illuminate\Support\Facades\DB;
 
 // 1. Landing Page (Halaman Depan)
 Route::get('/', function () {
@@ -18,6 +19,40 @@ Route::post('/analyze', [DiagnosisController::class, 'analyze'])->name('analyze'
 
 // 3. Chat AI (Text, File, URL)
 Route::post('/chat', [ChatController::class, 'sendMessage'])->name('chat.send');
+
+Route::get('/health', function () {
+    $status = 'ok';
+    $checks = [
+        'backend' => 'ok',
+        'database' => 'unknown',
+        'groq' => 'unknown',
+        'gee' => 'unknown',
+    ];
+
+    try {
+        DB::select('select 1');
+        $checks['database'] = 'ok';
+    } catch (\Throwable $e) {
+        $checks['database'] = 'error';
+        $status = 'degraded';
+    }
+
+    $groqReady = filled(config('services.groq.api_key'));
+    $geeReady = filled(config('services.gee.client_email')) && filled(config('services.gee.private_key'));
+
+    $checks['groq'] = $groqReady ? 'ok' : 'missing_config';
+    $checks['gee'] = $geeReady ? 'ok' : 'missing_config';
+
+    if (!$groqReady || !$geeReady) {
+        $status = 'degraded';
+    }
+
+    return response()->json([
+        'status' => $status,
+        'checks' => $checks,
+        'timestamp' => now()->toIso8601String(),
+    ]);
+});
 
 // Test Route untuk Verifikasi Scraping (Bisa dihapus nanti)
 Route::get('/test-scrape', function (Illuminate\Http\Request $request) {

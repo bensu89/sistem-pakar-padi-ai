@@ -305,7 +305,7 @@
 
         const URL_UPLOAD = "{{ route('analyze') }}";
         const URL_CHAT = "{{ route('chat.send') }}";
-        const URL_HEALTH = "{{ url('/api/pohaci/health') }}";
+        const URL_HEALTH = "{{ url('/health') }}";
 
         let currentDisease = "Konsultasi Umum";
         let attachedFile = null;
