@@ -1,133 +1,125 @@
-<p align="center">
-  <img src="https://img.shields.io/badge/Laravel-8.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel">
-  <img src="https://img.shields.io/badge/Groq_AI-Cloud_API-F55036?style=for-the-badge&logo=groq&logoColor=white" alt="Groq">
-  <img src="https://img.shields.io/badge/Tailwind_CSS-3.x-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind">
-  <img src="https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel">
-  <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase">
-</p>
-
 # 🌾 Pohaci AI — Ngariksa Pare, Ngajaga Lemah Cai
 
-**Pohaci AI** adalah aplikasi sistem pakar berbasis web untuk **deteksi penyakit tanaman padi** dan **konsultasi pertanian**. Aplikasi ini mengintegrasikan **Laravel** sebagai backend dengan **Groq Cloud API** untuk kecerdasan buatan yang cepat dan akurat.
+Pohaci AI adalah aplikasi sistem pakar berbasis web untuk deteksi penyakit tanaman padi dan konsultasi pertanian. Aplikasi ini mengintegrasikan Laravel sebagai backend dengan Groq Cloud API untuk kecerdasan buatan yang cepat dan akurat.
 
-> *"Pohaci"* diambil dari Dewi Sri (Nyi Pohaci) dalam mitologi Sunda — dewi padi dan kesuburan.
-
----
+> "Pohaci" diambil dari Dewi Sri (Nyi Pohaci) dalam mitologi Sunda — dewi padi dan kesuburan.
 
 ## ✨ Fitur Unggulan
 
 ### 🔬 Diagnosa Penyakit (Vision AI)
-- **Upload Foto Daun**: Analisa otomatis menggunakan model Vision AI (Llama 3.2 Vision / Llama 4 Scout).
-- **Hasil Instan**: Menampilkan nama penyakit, tingkat kepercayaan (confidence), dan solusi penanganan.
-- **Riwayat Diagnosa**: Data tersimpan untuk monitoring dan pelaporan.
+- Upload foto daun: analisa otomatis menggunakan model Vision AI.
+- Hasil instan: menampilkan nama penyakit, tingkat kepercayaan, dan solusi penanganan.
+- Riwayat diagnosa: data tersimpan untuk monitoring dan pelaporan.
 
 ### 💬 Chatbot AI Pertanian (Smart Assistant)
-- **Konsultasi Real-time**: Tanya jawab seputar pertanian padi.
-- **Multi-Modal**:
-  - **Text**: Pertanyaan umum.
-  - **Gambar (📎 Attach)**: Analisa foto hama/penyakit langsung di chat.
-  - **URL (🔗 Link)**: Analisa konten artikel/berita pertanian dari link eksternal.
-- **Dynamic Model**: Otomatis memilih model bahasa yang tepat (Llama 3.3 70B untuk chat kompleks, Mixtral untuk kecepatan).
+- Konsultasi real-time seputar pertanian padi.
+- Multi-modal:
+  - Text: pertanyaan umum.
+  - Gambar (attach): analisa foto hama/penyakit langsung di chat.
+  - URL: analisa konten artikel/berita pertanian dari link eksternal.
+- Dynamic model: otomatis memilih model bahasa yang tepat.
+
+### 🛰️ Analisa Spasial NDVI
+- Jika koordinat tersedia, sistem mengambil data satelit Sentinel-2.
+- NDVI dipakai untuk melihat indikasi kesehatan tanaman dan potensi kekurangan hara.
+- Jika koordinat tidak tersedia, sistem otomatis masuk ke jalur analisa biasa agar tetap cepat.
 
 ### 📱 Antarmuka Ramah Petani (Farmer-Friendly UI)
-- **Desain Mobile-First**: Tombol besar, kontras tinggi, mudah digunakan di HP saat di sawah.
-- **Aksi Cepat (Quick Actions)**: Chip pertanyaan instan ("Hama Wereng", "Pupuk") tanpa perlu mengetik panjang.
-- **Responsif & Ringan**: Tampilan bersih tanpa scrollbar mengganggu, optimal untuk sinyal desa.
+- Desain mobile-first: tombol besar, kontras tinggi, mudah digunakan di HP saat di sawah.
+- Aksi cepat: chip pertanyaan instan tanpa perlu mengetik panjang.
+- Responsif dan ringan.
 
 ### 🚜 Dashboard Admin Terintegrasi
 - Statistik penggunaan AI real-time.
-- Manajemen data diagnosa & riwayat chat.
-- Export laporan (Excel/CSV) untuk dinas/kelompok tani.
-
----
+- Manajemen data diagnosa dan riwayat chat.
+- Export laporan untuk dinas/kelompok tani.
 
 ## 🏗️ Arsitektur & Teknologi
 
 | Komponen | Teknologi | Keterangan |
-|----------|-----------|------------|
-| **Framework** | Laravel 8.83 | Backend PHP robust & stabil (PHP 8.4 Support) |
-| **Database** | PostgreSQL (Supabase) | Cloud database scalable |
-| **AI Engine** | Groq API | Inference super cepat (Llama 3.3 70B & Vision) |
-| **Frontend** | Blade + Tailwind CSS | UI responsif & mobile-first |
-| **Hosting** | Vercel (Serverless) | Deployment otomatis & performa tinggi |
-
----
+|---|---|---|
+| Framework | Laravel 8.83 | Backend PHP robust & stabil |
+| Database | PostgreSQL / MySQL | Cloud atau lokal |
+| AI Engine | Groq API | Inference cepat untuk chat dan vision |
+| Spasial | Google Earth Engine | NDVI Sentinel-2 |
+| Frontend | Blade + Tailwind CSS | UI responsif & mobile-first |
+| Proses satelit | Symfony Process + Node.js | Menjalankan script GEE |
 
 ## 🚀 Panduan Instalasi (Lokal)
 
-1.  **Clone Repository**
-    ```bash
-    git clone https://github.com/bensu89/sistem-pakar-padi-ai.git
-    cd sistem-pakar-padi-ai
-    ```
+### Clone Repository
 
-2.  **Install Dependensi**
-    ```bash
-    composer install
-    npm install && npm run dev
-    ```
+```bash
+git clone https://github.com/bensu89/sistem-pakar-padi-ai.git
+cd sistem-pakar-padi-ai
+```
 
-3.  **Konfigurasi Environment**
-    Salin `.env.example` ke `.env` dan sesuaikan:
-    ```env
-    APP_URL=http://localhost:8000
-    
-    # Database (Bisa pakai MySQL lokal atau Supabase)
-    DB_CONNECTION=mysql 
-    DB_HOST=127.0.0.1
-    DB_PORT=3306
-    DB_DATABASE=padi_db
-    DB_USERNAME=root
-    DB_PASSWORD=
+### Install Dependensi
 
-    # Groq API (Dapatkan di console.groq.com)
-    GROQ_API_KEY=gsk_...
-    GROQ_DEFAULT_MODEL=llama-3.1-8b-instant
-    GROQ_VISION_MODEL=llama-3.2-11b-vision-preview
-    ```
+```bash
+composer install
+npm install && npm run dev
+```
 
-4.  **Generate Key & Migrasi**
-    ```bash
-    php artisan key:generate
-    php artisan migrate
-    php artisan storage:link
-    ```
+### Konfigurasi Environment
 
-5.  **Jalankan Server**
-    ```bash
-    php artisan serve
-    ```
-    Buka `http://localhost:8000`
+Salin `.env.example` ke `.env` dan sesuaikan:
 
----
+```env
+APP_URL=http://localhost:8000
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=padi_db
+DB_USERNAME=root
+DB_PASSWORD=
+
+GROQ_API_KEY=gsk_...
+GROQ_DEFAULT_MODEL=llama-3.1-8b-instant
+GROQ_VISION_MODEL=llama-4-scout-17b-16e-instruct
+
+GEE_CLIENT_EMAIL=...
+GEE_PRIVATE_KEY=...
+```
+
+### Generate Key & Migrasi
+
+```bash
+php artisan key:generate
+php artisan migrate
+php artisan storage:link
+```
+
+### Jalankan Server
+
+```bash
+php artisan serve
+```
+
+Buka `http://localhost:8000`
 
 ## ☁️ Panduan Deployment (Vercel)
 
-Aplikasi ini sudah dikonfigurasi untuk **Vercel** serverless environment.
-
-1.  **Push ke GitHub** pastikan kode terbaru ada di repo.
-2.  **Import di Vercel Dashboard**.
-3.  **Set Environment Variables** di Vercel:
-    - `APP_KEY`: (Sama seperti lokal)
-    - `APP_DEBUG`: `false` (untuk production)
-    - `APP_URL`: `https://namaproject.vercel.app`
-    - `GROQ_API_KEY`: API Key Groq Anda
-    - `DB_CONNECTION`: `pgsql`
-    - `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`: Detail koneksi Supabase Anda.
-    - `GROQ_DEFAULT_MODEL`: `llama-3.1-8b-instant` (Rekomendasi)
-    - `GROQ_VISION_MODEL`: `llama-3.2-11b-vision-preview`
-4.  **Redeploy** jika ada perubahan kode.
-
-> **Catatan:** Untuk Vercel, pastikan menggunakan `vercel-php@0.9.0` (sudah diatur di `vercel.json`).
-
----
+1. Push ke GitHub pastikan kode terbaru ada di repo.
+2. Import di Vercel Dashboard.
+3. Set environment variables:
+   - `APP_KEY`
+   - `APP_DEBUG=false`
+   - `APP_URL`
+   - `GROQ_API_KEY`
+   - `GROQ_DEFAULT_MODEL`
+   - `GROQ_VISION_MODEL`
+   - `GEE_CLIENT_EMAIL`
+   - `GEE_PRIVATE_KEY`
+4. Redeploy jika ada perubahan kode.
 
 ## 🤝 Kontribusi & Credits
 
-Aplikasi ini dikembangkan oleh **Tim KKN Desa Cikurubuk** sebagai dedikasi untuk memajukan teknologi pertanian digital di Indonesia.
+Aplikasi ini dikembangkan untuk memajukan teknologi pertanian digital di Indonesia.
 
 ---
 
 <p align="center">
-  Dibuat dengan ❤️ untuk Pertanian Indonesia - Hidup JOKOWI 🇮🇩
+  Dibuat dengan ❤️ untuk Pertanian Indonesia.
 </p>
