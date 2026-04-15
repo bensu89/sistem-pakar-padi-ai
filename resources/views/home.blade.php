@@ -167,10 +167,6 @@
                 <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
                     <div class="flex items-center justify-between mb-2">
                         <p class="text-xs uppercase tracking-[0.2em] text-gray-500 font-semibold">Aksi Cepat</p>
-                        <button type="button" onclick="toggleQuickActions(event)"
-                            class="md:hidden text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded-full">
-                            Buka
-                        </button>
                     </div>
                     <div id="quickActionsPanel" class="hidden md:block">
                         <div id="quickActions" class="flex md:flex-wrap gap-2 overflow-x-auto md:overflow-visible no-scrollbar pb-1">
@@ -221,11 +217,6 @@
                         class="md:hidden bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm">
                         <i class="fa-solid fa-camera"></i>
                         Diagnosa Foto
-                    </button>
-                    <button type="button" onclick="toggleQuickActions(event)"
-                        class="md:hidden bg-white text-green-700 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm border border-green-200">
-                        <i class="fa-solid fa-bolt"></i>
-                        Aksi Cepat
                     </button>
                     <button type="button" onclick="resetApp()"
                         class="text-gray-400 hover:text-red-500 transition text-xs flex items-center gap-1 border border-gray-300 px-2 py-1.5 rounded-full bg-white hover:border-red-400 hover:bg-red-50 tooltip"
@@ -408,17 +399,6 @@
                 openSidebar();
             } else {
                 closeSidebar();
-            }
-        }
-
-        function toggleQuickActions(evt) {
-            const panel = document.getElementById('quickActionsPanel');
-            const button = evt?.currentTarget;
-            if (!panel) return;
-
-            panel.classList.toggle('hidden');
-            if (button) {
-                button.textContent = panel.classList.contains('hidden') ? 'Buka' : 'Tutup';
             }
         }
 
