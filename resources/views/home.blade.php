@@ -307,6 +307,7 @@
         const URL_CHAT = "{{ route('chat.send') }}";
         const URL_HEALTH = "{{ url('/health') }}";
         const CHAT_CONVERSATION_KEY = 'pohaci_chat_conversation_id';
+        const DIAGNOSIS_SESSION_KEY = 'pohaci_has_diagnosis';
 
         let currentDisease = "Konsultasi Umum";
         let attachedFile = null;
@@ -314,6 +315,29 @@
         let currentConversationId = localStorage.getItem(CHAT_CONVERSATION_KEY) || '';
         const mobileSidebar = document.getElementById('mobileSidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function resetDiagnosisUI() {
+            const section = document.getElementById('resultSection');
+            if (!section) return;
+
+            section.classList.add('hidden');
+            const disease = document.getElementById('resDisease');
+            const bar = document.getElementById('resConfidenceBar');
+            const conf = document.getElementById('resConfidenceText');
+
+            if (disease) disease.innerText = 'Nama Penyakit';
+            if (bar) bar.style.width = '0%';
+            if (conf) conf.innerText = '0%';
+        }
+
+        function ensureDiagnosisNotAutoShown() {
+            if (!sessionStorage.getItem(DIAGNOSIS_SESSION_KEY)) {
+                resetDiagnosisUI();
+            }
+        }
+
+        ensureDiagnosisNotAutoShown();
+        window.addEventListener('pageshow', ensureDiagnosisNotAutoShown);
 
         // --- ESCAPE HTML (XSS prevention) ---
         function escapeHtml(text) {
@@ -411,6 +435,8 @@
         }
 
         function renderDiagnosisResult(data) {
+            sessionStorage.setItem(DIAGNOSIS_SESSION_KEY, '1');
+
             document.getElementById('resultSection').classList.remove('hidden');
             document.getElementById('resDisease').innerText = data.disease_name;
             document.getElementById('resConfidenceBar').style.width = data.confidence + "%";
@@ -523,7 +549,8 @@
                 document.getElementById('imagePreview').src = "";
                 document.getElementById('previewContainer').classList.add('hidden');
                 document.getElementById('uploadPrompt').classList.remove('hidden');
-                document.getElementById('resultSection').classList.add('hidden');
+                sessionStorage.removeItem(DIAGNOSIS_SESSION_KEY);
+                resetDiagnosisUI();
                 currentDisease = "Konsultasi Umum";
                 currentConversationId = '';
                 localStorage.removeItem(CHAT_CONVERSATION_KEY);

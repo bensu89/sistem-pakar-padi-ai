@@ -350,16 +350,31 @@ class PohaciAnalysisController extends Controller
         $env['GEE_END_DATE'] = now()->format('Y-m-d');
 
         $process->setEnv($env);
-        $process->setTimeout(120);
+        $process->setTimeout(45);
         $process->run();
 
+        $stdout = trim($process->getOutput());
+        $decoded = $stdout !== '' ? json_decode($stdout, true) : null;
+
         if (!$process->isSuccessful()) {
-            throw new \RuntimeException(trim($process->getErrorOutput()) ?: 'Gagal terhubung ke script satelit.');
+            $message = trim($process->getErrorOutput());
+            if (!$message && is_array($decoded)) {
+                $message = (string) ($decoded['message'] ?? 'Gagal terhubung ke script satelit.');
+            }
+            throw new \RuntimeException($message ?: 'Gagal terhubung ke script satelit.');
         }
 
-        $decoded = json_decode($process->getOutput(), true);
         if (!is_array($decoded)) {
             throw new \RuntimeException('Response satelit tidak valid.');
+        }
+
+        if (($decoded['status'] ?? null) === 'error') {
+            throw new \RuntimeException((string) ($decoded['message'] ?? 'GEE error.'));
+        }
+
+        // Normalisasi output: script mengembalikan {status, data:{satellite, coordinates, window, data:{NDVI}}}
+        if (isset($decoded['data']) && is_array($decoded['data'])) {
+            return $decoded['data'];
         }
 
         return $decoded;

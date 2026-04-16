@@ -98,8 +98,11 @@ class DiagnosisController extends Controller
 
             return response()->json($result);
 
+        } catch (\RuntimeException $e) {
+            $status = in_array($e->getCode(), [502, 503], true) ? $e->getCode() : 500;
+            return response()->json(['error' => $e->getMessage()], $status);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['error' => 'Terjadi kesalahan saat memproses diagnosa.'], 500);
         }
     }
 

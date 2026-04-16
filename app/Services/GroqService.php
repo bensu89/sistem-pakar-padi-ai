@@ -244,27 +244,40 @@ Aturan:
             ],
         ];
 
-        $response = $this->sendRequest($messages, $model);
+        $response = trim($this->sendRequest($messages, $model));
 
-        // Parse JSON dari response
+        // Jika request ke AI gagal, jangan kembalikan hasil "diagnosa" palsu.
+        if (str_starts_with($response, '⚠️')) {
+            Log::error('Groq diagnosisImage failed: ' . $response);
+            throw new \RuntimeException('Layanan AI sedang bermasalah. Silakan coba lagi.', 503);
+        }
+
         // Coba extract JSON dari response (kadang ada text tambahan)
         if (preg_match('/\{[^{}]*"disease_name"[^{}]*\}/s', $response, $matches)) {
             $parsed = json_decode($matches[0], true);
-            if ($parsed) {
+            if (is_array($parsed)) {
+                $diseaseName = trim((string) ($parsed['disease_name'] ?? ''));
+                $solution = trim((string) ($parsed['solution'] ?? ''));
+
+                if ($diseaseName === '' || $solution === '') {
+                    Log::warning('Groq diagnosisImage missing fields: ' . $matches[0]);
+                    throw new \RuntimeException('Respons AI tidak valid. Silakan upload ulang foto yang lebih jelas.', 502);
+                }
+
+                $confidence = (float) ($parsed['confidence'] ?? 0);
+                $confidence = max(0, min(100, $confidence));
+
                 return [
-                    'disease_name' => $parsed['disease_name'] ?? 'Tidak Diketahui',
-                    'confidence' => (float) ($parsed['confidence'] ?? 0),
-                    'solution' => $parsed['solution'] ?? 'Tidak ada solusi.',
+                    'disease_name' => $diseaseName,
+                    'confidence' => $confidence,
+                    'solution' => $solution,
+                    'model_used' => $model,
                 ];
             }
         }
 
-        // Fallback jika parsing gagal
-        return [
-            'disease_name' => 'Tidak Diketahui',
-            'confidence' => 0,
-            'solution' => $response,
-        ];
+        Log::warning('Groq diagnosisImage invalid response: ' . mb_substr($response, 0, 2000));
+        throw new \RuntimeException('Respons AI tidak valid. Silakan upload ulang foto yang lebih jelas.', 502);
     }
 
     protected function selectTextModel(string $message, ?string $diseaseContext = null, ?string $conversationContext = null): string
