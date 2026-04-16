@@ -8,6 +8,7 @@ use App\Models\Diagnosis;
 use App\Models\FailedUpload;
 use App\Models\PohaciMonitoring;
 use App\Services\GroqService;
+use Symfony\Component\Process\Process;
 
 class DiagnosisController extends Controller
 {
@@ -30,6 +31,8 @@ class DiagnosisController extends Controller
         // 1. Validasi Input
         $request->validate([
             'file' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         try {
@@ -51,6 +54,22 @@ class DiagnosisController extends Controller
 
             // 3. Kirim ke Groq Vision untuk diagnosa
             $result = $this->groq->diagnosisImage($base64Image, $mimeType);
+            $coordinates = $this->resolveCoordinates($request, $image);
+            $spatialPayload = null;
+            $analysisMode = 'standard';
+            $ndviValue = null;
+            $satelliteSource = null;
+
+            if ($coordinates) {
+                try {
+                    $spatialPayload = $this->fetchSpatialData($coordinates['latitude'], $coordinates['longitude']);
+                    $ndviValue = data_get($spatialPayload, 'data.NDVI');
+                    $satelliteSource = data_get($spatialPayload, 'satellite');
+                    $analysisMode = 'spatial';
+                } catch (\Throwable $e) {
+                    $analysisMode = 'spatial_fallback';
+                }
+            }
 
             // --- LOGIKA PENENTUAN (FILTERING) ---
 
@@ -87,16 +106,24 @@ class DiagnosisController extends Controller
                 'disease_name' => $diagnosis->disease_name,
                 'confidence' => $diagnosis->confidence,
                 'solution' => $diagnosis->solution,
-                'analysis_mode' => 'standard',
+                'ndvi_value' => $ndviValue,
+                'satellite_source' => $satelliteSource,
+                'analysis_mode' => $analysisMode,
                 'recommendation' => $diagnosis->solution,
                 'followup_status' => 'pending',
                 'raw_payload' => [
                     'diagnosis' => $result,
                     'coordinates' => $coordinates,
+                    'spatial' => $spatialPayload,
                 ],
             ]);
 
-            return response()->json($result);
+            return response()->json(array_merge($result, [
+                'ndvi_value' => $ndviValue,
+                'satellite_source' => $satelliteSource,
+                'analysis_mode' => $analysisMode,
+                'coordinates' => $coordinates,
+            ]));
 
         } catch (\RuntimeException $e) {
             $status = in_array($e->getCode(), [502, 503], true) ? $e->getCode() : 500;
@@ -106,37 +133,88 @@ class DiagnosisController extends Controller
         }
     }
 
+    protected function fetchSpatialData(float $latitude, float $longitude): array
+    {
+        $process = new Process(['node', base_path('scripts/gee_fetch.js')]);
+        $env = getenv();
+
+        if (!is_array($env)) {
+            $env = $_SERVER;
+        }
+
+        $env['PATH'] = getenv('PATH') ?: ($_SERVER['PATH'] ?? '');
+        $env['SystemRoot'] = getenv('SystemRoot') ?: ($_SERVER['SystemRoot'] ?? 'C:\\WINDOWS');
+        $env['SystemDrive'] = getenv('SystemDrive') ?: ($_SERVER['SystemDrive'] ?? 'C:');
+        $env['GEE_CLIENT_EMAIL'] = config('services.gee.client_email');
+        $env['GEE_PRIVATE_KEY'] = config('services.gee.private_key');
+        $env['GEE_LATITUDE'] = (string) $latitude;
+        $env['GEE_LONGITUDE'] = (string) $longitude;
+        $env['GEE_START_DATE'] = now()->subMonths(2)->format('Y-m-d');
+        $env['GEE_END_DATE'] = now()->format('Y-m-d');
+
+        $process->setEnv($env);
+        $process->setTimeout(45);
+        $process->run();
+
+        $stdout = trim($process->getOutput());
+        $decoded = $stdout !== '' ? json_decode($stdout, true) : null;
+
+        if (!$process->isSuccessful()) {
+            $message = trim($process->getErrorOutput());
+            if (!$message && is_array($decoded)) {
+                $message = (string) ($decoded['message'] ?? 'Gagal terhubung ke script satelit.');
+            }
+            throw new \RuntimeException($message ?: 'Gagal terhubung ke script satelit.');
+        }
+
+        if (!is_array($decoded)) {
+            throw new \RuntimeException('Response satelit tidak valid.');
+        }
+
+        if (($decoded['status'] ?? null) === 'error') {
+            throw new \RuntimeException((string) ($decoded['message'] ?? 'GEE error.'));
+        }
+
+        if (isset($decoded['data']) && is_array($decoded['data'])) {
+            return $decoded['data'];
+        }
+
+        return $decoded;
+    }
+
     protected function resolveCoordinates(Request $request, $file): ?array
     {
+        if ($file && function_exists('exif_read_data')) {
+            $exif = @exif_read_data($file->getRealPath(), 'GPS', true);
+            if (is_array($exif)) {
+                $latitude = $this->extractGpsCoordinate($exif, 'GPSLatitude', 'GPSLatitudeRef');
+                $longitude = $this->extractGpsCoordinate($exif, 'GPSLongitude', 'GPSLongitudeRef');
+
+                if ($latitude !== null && $longitude !== null) {
+                    return [
+                        'latitude' => $latitude,
+                        'longitude' => $longitude,
+                        'source' => 'exif',
+                        'confidence' => 85,
+                        'raw_payload' => $exif,
+                    ];
+                }
+            }
+        }
+
         if ($request->filled('latitude') && $request->filled('longitude')) {
             return [
                 'latitude' => (float) $request->input('latitude'),
                 'longitude' => (float) $request->input('longitude'),
                 'source' => 'request',
+                'confidence' => 100,
+                'raw_payload' => [
+                    'source' => 'request',
+                ],
             ];
         }
 
-        if (!$file || !function_exists('exif_read_data')) {
-            return null;
-        }
-
-        $exif = @exif_read_data($file->getRealPath(), 'GPS', true);
-        if (!is_array($exif)) {
-            return null;
-        }
-
-        $latitude = $this->extractGpsCoordinate($exif, 'GPSLatitude', 'GPSLatitudeRef');
-        $longitude = $this->extractGpsCoordinate($exif, 'GPSLongitude', 'GPSLongitudeRef');
-
-        if ($latitude === null || $longitude === null) {
-            return null;
-        }
-
-        return [
-            'latitude' => $latitude,
-            'longitude' => $longitude,
-            'source' => 'exif',
-        ];
+        return null;
     }
 
     protected function extractGpsCoordinate(array $exif, string $key, string $refKey): ?float

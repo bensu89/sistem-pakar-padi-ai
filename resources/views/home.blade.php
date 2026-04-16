@@ -126,8 +126,9 @@
                     <form id="uploadForm" class="space-y-3 mt-4">
                         <label for="imageInput"
                             class="border-2 border-dashed border-green-300 rounded-2xl bg-white/90 hover:bg-green-50 transition cursor-pointer relative min-h-[12rem] flex flex-col justify-center items-center group overflow-hidden shadow-inner">
-                            <input type="file" id="imageInput" name="image" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                accept="image/*" capture="environment" required>
+                            <input type="file" id="imageInputCamera" name="image_camera" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                accept="image/*" capture="environment">
+                            <input type="file" id="imageInputGallery" name="image_gallery" class="hidden" accept="image/*">
                             <div id="previewContainer" class="hidden w-full h-full absolute inset-0 bg-white">
                                 <img id="imagePreview" src="" class="w-full h-full object-contain p-2">
                             </div>
@@ -139,6 +140,16 @@
                                 <p class="text-gray-500 text-sm mt-1">Pastikan bagian daun terlihat jelas</p>
                             </div>
                         </label>
+                        <div class="grid grid-cols-2 gap-2 md:hidden">
+                            <button type="button" onclick="triggerCameraInput()"
+                                class="px-4 py-2.5 rounded-xl bg-green-600 text-white font-semibold text-sm flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-camera"></i> Kamera
+                            </button>
+                            <button type="button" onclick="triggerGalleryInput()"
+                                class="px-4 py-2.5 rounded-xl bg-white border border-green-300 text-green-700 font-semibold text-sm flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-images"></i> Galeri
+                            </button>
+                        </div>
                         <button type="submit" id="btnDiagnosa"
                             class="w-full bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-4 rounded-2xl transition shadow-lg hover:shadow-green-500/30 flex justify-center items-center gap-3 active:scale-95 text-lg">
                             <i class="fa-solid fa-magnifying-glass-chart"></i>
@@ -160,6 +171,11 @@
                         <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2">
                             <div id="resConfidenceBar" class="bg-green-500 h-1.5 rounded-full transition-all duration-1000"
                                 style="width: 0%"></div>
+                        </div>
+                        <div id="resSpatialInfo" class="hidden mt-4 text-xs text-gray-600 space-y-1">
+                            <p><span class="font-semibold uppercase text-gray-500">NDVI:</span> <span id="resNdviValue">-</span></p>
+                            <p><span class="font-semibold uppercase text-gray-500">Mode:</span> <span id="resAnalysisMode">-</span></p>
+                            <p><span class="font-semibold uppercase text-gray-500">Sumber Koordinat:</span> <span id="resCoordSource">-</span></p>
                         </div>
                     </div>
                 </div>
@@ -312,6 +328,7 @@
         let currentDisease = "Konsultasi Umum";
         let attachedFile = null;
         let attachedUrl = null;
+        let browserLocation = null;
         let currentConversationId = localStorage.getItem(CHAT_CONVERSATION_KEY) || '';
         const mobileSidebar = document.getElementById('mobileSidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
@@ -324,10 +341,18 @@
             const disease = document.getElementById('resDisease');
             const bar = document.getElementById('resConfidenceBar');
             const conf = document.getElementById('resConfidenceText');
+            const spatialInfo = document.getElementById('resSpatialInfo');
+            const ndvi = document.getElementById('resNdviValue');
+            const mode = document.getElementById('resAnalysisMode');
+            const coordSource = document.getElementById('resCoordSource');
 
             if (disease) disease.innerText = 'Nama Penyakit';
             if (bar) bar.style.width = '0%';
             if (conf) conf.innerText = '0%';
+            if (spatialInfo) spatialInfo.classList.add('hidden');
+            if (ndvi) ndvi.innerText = '-';
+            if (mode) mode.innerText = '-';
+            if (coordSource) coordSource.innerText = '-';
         }
 
         function ensureDiagnosisNotAutoShown() {
@@ -442,6 +467,23 @@
             document.getElementById('resConfidenceBar').style.width = data.confidence + "%";
             document.getElementById('resConfidenceText').innerText = data.confidence + "%";
 
+            const spatialInfo = document.getElementById('resSpatialInfo');
+            const ndviValue = document.getElementById('resNdviValue');
+            const analysisMode = document.getElementById('resAnalysisMode');
+            const coordSource = document.getElementById('resCoordSource');
+            if (spatialInfo && ndviValue && analysisMode && coordSource) {
+                ndviValue.innerText = data.ndvi_value !== undefined && data.ndvi_value !== null
+                    ? Number(data.ndvi_value).toFixed(5)
+                    : 'Belum tersedia';
+                analysisMode.innerText = data.analysis_mode || 'standard';
+                coordSource.innerText = data.coordinates?.source === 'exif'
+                    ? 'Kamera / EXIF GPS'
+                    : data.coordinates?.source === 'request'
+                        ? 'Browser / Manual'
+                        : 'Belum tersedia';
+                spatialInfo.classList.remove('hidden');
+            }
+
             currentDisease = data.disease_name;
 
             const analisaRapi = formatText(data.solution);
@@ -534,6 +576,23 @@
             }
         }
 
+        function captureBrowserLocation() {
+            if (!navigator.geolocation) return;
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    browserLocation = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                    };
+                },
+                () => {
+                    browserLocation = null;
+                },
+                { enableHighAccuracy: true, timeout: 5000, maximumAge: 300000 }
+            );
+        }
+
         // ============================================================
         // RESET FUNCTIONS
         // ============================================================
@@ -577,25 +636,49 @@
         // ============================================================
         // PREVIEW IMAGE (Chat Photo Card)
         // ============================================================
-        document.getElementById('imageInput').addEventListener('change', function (e) {
+        function handleDiagnosisImageSelection(file) {
+            if (!file) return;
+
+            document.getElementById('imageInputCamera').value = '';
+            document.getElementById('imageInputGallery').value = '';
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('imagePreview').src = e.target.result;
+                document.getElementById('previewContainer').classList.remove('hidden');
+                document.getElementById('uploadPrompt').classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        document.getElementById('imageInputCamera').addEventListener('change', function (e) {
             const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    document.getElementById('imagePreview').src = e.target.result;
-                    document.getElementById('previewContainer').classList.remove('hidden');
-                    document.getElementById('uploadPrompt').classList.add('hidden');
-                }
-                reader.readAsDataURL(file);
-            }
+            handleDiagnosisImageSelection(file);
         });
+
+        document.getElementById('imageInputGallery').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            handleDiagnosisImageSelection(file);
+        });
+
+        function triggerCameraInput() {
+            document.getElementById('imageInputCamera').click();
+        }
+
+        function triggerGalleryInput() {
+            document.getElementById('imageInputGallery').click();
+        }
+
+        captureBrowserLocation();
 
         // ============================================================
         // 1. UPLOAD & DIAGNOSA (Chat Photo Card → Groq Vision)
         // ============================================================
         document.getElementById('uploadForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-            const fileInput = document.getElementById('imageInput');
+            const fileInput = document.getElementById('imageInputGallery').files[0]
+                ? document.getElementById('imageInputGallery')
+                : document.getElementById('imageInputCamera');
 
             if (!fileInput.files[0]) {
                 showToast('warning', 'Pilih foto dulu!');
@@ -609,6 +692,10 @@
 
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
+            if (browserLocation) {
+                formData.append('latitude', browserLocation.latitude);
+                formData.append('longitude', browserLocation.longitude);
+            }
 
             try {
                 const response = await axios.post(URL_UPLOAD, formData);
@@ -672,6 +759,10 @@
             try {
                 if (hasDiagnosisImage) {
                     formData.append('file', attachedFile);
+                    if (browserLocation) {
+                        formData.append('latitude', browserLocation.latitude);
+                        formData.append('longitude', browserLocation.longitude);
+                    }
                     const response = await axios.post(URL_UPLOAD, formData);
                     renderDiagnosisResult(response.data);
                 } else {

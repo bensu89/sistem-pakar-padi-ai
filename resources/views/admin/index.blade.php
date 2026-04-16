@@ -159,13 +159,8 @@
                         <tr>
                             <th class="px-6 py-3">Petani / Akun</th>
                             <th class="px-6 py-3">Waktu</th>
-                            <th class="px-6 py-3">Lokasi / Koordinat</th>
-                            <th class="px-6 py-3">Sumber Koordinat</th>
-                            <th class="px-6 py-3">Foto</th>
                             <th class="px-6 py-3">Hasil Diagnosa</th>
-                            <th class="px-6 py-3">NDVI</th>
-                            <th class="px-6 py-3">Mode</th>
-                            <th class="px-6 py-3">Rekomendasi</th>
+                            <th class="px-6 py-3">Akurasi / NDVI</th>
                             <th class="px-6 py-3">Status</th>
                             <th class="px-6 py-3 text-center">Aksi</th>
                         </tr>
@@ -176,6 +171,7 @@
                                 <td class="px-6 py-4">
                                     <div class="font-semibold text-gray-800">{{ $item->reporter_name ?? '-' }}</div>
                                     <div class="text-xs text-gray-500">{{ $item->reporter_email ?? '-' }}</div>
+                                    <div class="text-xs text-gray-400 mt-1">{{ $item->location_label ?? '-' }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     {{ $item->created_at->format('d M Y') }} <br>
@@ -183,43 +179,24 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm text-gray-700">
-                                        <div class="font-semibold">{{ $item->location_label ?? '-' }}</div>
-                                        <div class="text-xs text-gray-400">{{ $item->latitude ?? '-' }}, {{ $item->longitude ?? '-' }}</div>
+                                        <div class="font-semibold">{{ $item->disease_name ?? '-' }}</div>
+                                        <div class="text-xs text-gray-400 mt-1 line-clamp-2">
+                                            {{ $item->recommendation ?? $item->solution ?? '-' }}
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-700">
-                                        {{ $item->coordinate_source ?? '-' }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    @if($item->image_path)
-                                        <div class="h-16 w-16 rounded-lg overflow-hidden border border-gray-200 shadow-sm group relative">
-                                            <img src="{{ asset($item->image_path) }}"
-                                                class="object-cover w-full h-full transform group-hover:scale-110 transition duration-300"
-                                                alt="Padi">
-                                        </div>
-                                    @else
-                                        <span class="text-xs text-gray-400">Tidak ada</span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="font-bold text-gray-800 text-base block">{{ $item->disease_name }}</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    @php $ndvi = $item->ndvi_value !== null ? number_format((float) $item->ndvi_value, 5) : '-'; @endphp
-                                    <span class="px-2 py-1 rounded-full font-bold text-xs bg-blue-100 text-blue-700">
-                                        {{ $ndvi }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold {{ $item->analysis_mode === 'spatial' ? 'bg-emerald-100 text-emerald-700' : ($item->analysis_mode === 'spatial_fallback' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700') }}">
-                                        {{ $item->analysis_mode ?? '-' }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="max-w-xs text-sm text-gray-700 line-clamp-3">
-                                        {{ $item->recommendation ?? $item->solution ?? '-' }}
+                                    @php
+                                        $confidence = $item->confidence !== null ? rtrim(rtrim(number_format((float) $item->confidence, 1), '0'), '.') . '%' : '-';
+                                        $ndvi = $item->ndvi_value !== null ? number_format((float) $item->ndvi_value, 5) : '-';
+                                    @endphp
+                                    <div class="flex flex-col gap-1">
+                                        <span class="px-2 py-1 rounded-full font-bold text-xs bg-blue-100 text-blue-700 inline-block">
+                                            AK {{ $confidence }}
+                                        </span>
+                                        <span class="px-2 py-1 rounded-full font-bold text-xs bg-emerald-100 text-emerald-700 inline-block">
+                                            NDVI {{ $ndvi }}
+                                        </span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
@@ -228,20 +205,56 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-center">
-                                    <form action="{{ route('admin.destroy', $item->id) }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"
-                                            title="Hapus Data"
-                                            data-confirm="Hapus data diagnosa ini permanen?">
-                                            <i class="fa-solid fa-trash"></i>
+                                    <div class="flex items-center justify-center gap-2">
+                                        <button type="button"
+                                            class="text-gray-500 hover:text-green-600 hover:bg-green-50 p-2 rounded-lg transition"
+                                            onclick="toggleMonitoringDetail('detail-row-{{ $item->id }}')"
+                                            title="Lihat Detail">
+                                            <i class="fa-solid fa-chevron-down"></i>
                                         </button>
-                                    </form>
+                                        <form action="{{ route('admin.destroy', $item->id) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"
+                                                title="Hapus Data"
+                                                data-confirm="Hapus data diagnosa ini permanen?">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr id="detail-row-{{ $item->id }}" class="hidden bg-gray-50/70 border-b">
+                                <td colspan="6" class="px-6 py-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs text-gray-600">
+                                        <div>
+                                            <p class="font-semibold text-gray-500 uppercase">Koordinat</p>
+                                            <p class="mt-1">{{ $item->latitude ?? '-' }}, {{ $item->longitude ?? '-' }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-500 uppercase">Sumber Koordinat</p>
+                                            <p class="mt-1">{{ $item->coordinate_source ?? '-' }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-500 uppercase">Mode Analisa</p>
+                                            <p class="mt-1">{{ $item->analysis_mode ?? '-' }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-500 uppercase">Foto</p>
+                                            <p class="mt-1">
+                                                @if($item->image_path)
+                                                    <a href="{{ asset($item->image_path) }}" target="_blank" class="text-green-600 hover:underline">Buka gambar</a>
+                                                @else
+                                                    -
+                                                @endif
+                                            </p>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="11" class="px-6 py-10 text-center text-gray-400 bg-gray-50">
+                                <td colspan="6" class="px-6 py-10 text-center text-gray-400 bg-gray-50">
                                     <div class="flex flex-col items-center">
                                         <i class="fa-solid fa-folder-open text-3xl mb-2 text-gray-300"></i>
                                         <p>Belum ada data penelitian.</p>
@@ -262,7 +275,7 @@
                             <div>
                                 <p class="text-xs text-gray-500 font-semibold">Petani / Akun</p>
                                 <p class="text-sm font-medium text-gray-800">{{ $item->reporter_name ?? '-' }}</p>
-                                <p class="text-xs text-gray-400">{{ $item->reporter_email ?? '-' }}</p>
+                                <p class="text-xs text-gray-400">{{ $item->location_label ?? '-' }}</p>
                             </div>
 
                             <div>
@@ -273,55 +286,34 @@
                             </div>
 
                             <div>
-                                <p class="text-xs text-gray-500 font-semibold">Lokasi / Koordinat</p>
-                                <p class="text-base font-bold text-gray-800">{{ $item->location_label ?? '-' }}</p>
-                                <p class="text-xs text-gray-400">{{ $item->latitude ?? '-' }}, {{ $item->longitude ?? '-' }}</p>
-                            </div>
-
-                            <div>
-                                <p class="text-xs text-gray-500 font-semibold">Sumber Koordinat</p>
-                                <span class="px-2 py-1 rounded-full font-bold text-xs inline-block bg-gray-100 text-gray-700">
-                                    {{ $item->coordinate_source ?? '-' }}
-                                </span>
-                            </div>
-
-                            <div>
-                                <p class="text-xs text-gray-500 font-semibold">Foto</p>
-                                @if($item->image_path)
-                                    <div class="h-28 w-full rounded-lg overflow-hidden border border-gray-200 shadow-sm">
-                                        <img src="{{ asset($item->image_path) }}" class="object-cover w-full h-full" alt="Padi">
-                                    </div>
-                                @else
-                                    <p class="text-sm text-gray-400">Tidak ada foto</p>
-                                @endif
-                            </div>
-
-                            <div>
-                                <p class="text-xs text-gray-500 font-semibold">Hasil Diagnosa</p>
+                                <p class="text-xs text-gray-500 font-semibold">Diagnosa / Akurasi</p>
                                 <p class="text-base font-bold text-gray-800">{{ $item->disease_name ?? '-' }}</p>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <p class="text-xs text-gray-500 font-semibold">NDVI</p>
-                                    <p class="text-sm font-medium text-gray-800">{{ $item->ndvi_value !== null ? number_format((float) $item->ndvi_value, 5) : '-' }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-500 font-semibold">Mode</p>
-                                    <p class="text-sm font-medium text-gray-800">{{ $item->analysis_mode ?? '-' }}</p>
-                                </div>
+                                <p class="text-xs text-gray-400">
+                                    {{ $item->confidence !== null ? rtrim(rtrim(number_format((float) $item->confidence, 1), '0'), '.') . '%' : '-' }}
+                                </p>
                             </div>
 
                             <div>
-                                <p class="text-xs text-gray-500 font-semibold">Rekomendasi</p>
-                                <p class="text-sm text-gray-800">{{ $item->recommendation ?? $item->solution ?? '-' }}</p>
+                                <p class="text-xs text-gray-500 font-semibold">NDVI / Status</p>
+                                <p class="text-sm font-medium text-gray-800">
+                                    {{ $item->ndvi_value !== null ? number_format((float) $item->ndvi_value, 5) : '-' }}
+                                    · {{ $item->followup_status ?? 'pending' }}
+                                </p>
                             </div>
 
                             <div>
-                                <p class="text-xs text-gray-500 font-semibold">Status Tindak Lanjut</p>
-                                <span class="px-2 py-1 rounded-full font-bold text-xs inline-block {{ $item->followup_status === 'done' ? 'bg-green-100 text-green-700' : ($item->followup_status === 'in_progress' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700') }}">
-                                    {{ $item->followup_status ?? 'pending' }}
-                                </span>
+                                <details class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                    <summary class="cursor-pointer text-sm font-semibold text-gray-700">Lihat detail</summary>
+                                    <div class="mt-3 space-y-2 text-sm text-gray-600">
+                                        <p><span class="font-semibold">Lokasi:</span> {{ $item->location_label ?? '-' }}</p>
+                                        <p><span class="font-semibold">Koordinat:</span> {{ $item->latitude ?? '-' }}, {{ $item->longitude ?? '-' }}</p>
+                                        <p><span class="font-semibold">Mode:</span> {{ $item->analysis_mode ?? '-' }}</p>
+                                        <p><span class="font-semibold">Rekomendasi:</span> {{ $item->recommendation ?? $item->solution ?? '-' }}</p>
+                                        @if($item->image_path)
+                                            <a href="{{ asset($item->image_path) }}" target="_blank" class="inline-block text-green-600 hover:underline">Buka foto</a>
+                                        @endif
+                                    </div>
+                                </details>
                             </div>
                         </div>
 
@@ -516,6 +508,13 @@
             return div.innerHTML;
         }
 
+        function toggleMonitoringDetail(id) {
+            const row = document.getElementById(id);
+            if (!row) return;
+
+            row.classList.toggle('hidden');
+        }
+
         // ============================================================
         // CONFIRM DIALOG SYSTEM
         // ============================================================
@@ -534,17 +533,17 @@
                                 <p class="text-gray-600">${escapeHtml(message)}</p>
                             </div>
                             <div class="p-6 border-t border-gray-200 flex gap-3 justify-end">
-                                <button onclick="document.getElementById('${id}').remove(); document.getElementById('${id}-overlay').remove();" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition">
+                                <button type="button" onclick="document.getElementById('${id}').remove(); document.getElementById('${id}-overlay').remove(); window.confirmDialogResolve(false);" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition">
                                     ${escapeHtml(cancelText)}
                                 </button>
-                                <button onclick="document.getElementById('${id}').remove(); document.getElementById('${id}-overlay').remove(); window.confirmDialogResolve(${id}, true);" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition">
+                                <button type="button" onclick="document.getElementById('${id}').remove(); document.getElementById('${id}-overlay').remove(); window.confirmDialogResolve(true);" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition">
                                     ${escapeHtml(confirmText)}
                                 </button>
                             </div>
                         </div>
                     </div>`;
 
-                window.confirmDialogResolve = (dialogId, result) => resolve(result);
+                window.confirmDialogResolve = (result) => resolve(result);
 
                 document.body.insertAdjacentHTML('beforeend', dialogHTML);
             });

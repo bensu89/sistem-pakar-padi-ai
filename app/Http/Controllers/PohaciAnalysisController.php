@@ -244,6 +244,24 @@ class PohaciAnalysisController extends Controller
 
     protected function resolveCoordinates(Request $request, $file): ?array
     {
+        if ($file && function_exists('exif_read_data')) {
+            $exif = @exif_read_data($file->getRealPath(), 'GPS', true);
+            if (is_array($exif)) {
+                $latitude = $this->extractGpsCoordinate($exif, 'GPSLatitude', 'GPSLatitudeRef');
+                $longitude = $this->extractGpsCoordinate($exif, 'GPSLongitude', 'GPSLongitudeRef');
+
+                if ($latitude !== null && $longitude !== null) {
+                    return [
+                        'latitude' => $latitude,
+                        'longitude' => $longitude,
+                        'source' => 'exif',
+                        'confidence' => 85,
+                        'raw_payload' => $exif,
+                    ];
+                }
+            }
+        }
+
         if ($request->filled('latitude') && $request->filled('longitude')) {
             return [
                 'latitude' => (float) $request->input('latitude'),
@@ -256,29 +274,7 @@ class PohaciAnalysisController extends Controller
             ];
         }
 
-        if (!$file || !function_exists('exif_read_data')) {
-            return null;
-        }
-
-        $exif = @exif_read_data($file->getRealPath(), 'GPS', true);
-        if (!is_array($exif)) {
-            return null;
-        }
-
-        $latitude = $this->extractGpsCoordinate($exif, 'GPSLatitude', 'GPSLatitudeRef');
-        $longitude = $this->extractGpsCoordinate($exif, 'GPSLongitude', 'GPSLongitudeRef');
-
-        if ($latitude === null || $longitude === null) {
-            return null;
-        }
-
-        return [
-            'latitude' => $latitude,
-            'longitude' => $longitude,
-            'source' => 'exif',
-            'confidence' => 85,
-            'raw_payload' => $exif,
-        ];
+        return null;
     }
 
     protected function extractGpsCoordinate(array $exif, string $key, string $refKey): ?float
