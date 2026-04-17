@@ -161,7 +161,7 @@
                             <th class="px-6 py-3">Waktu</th>
                             <th class="px-6 py-3">Hasil Diagnosa</th>
                             <th class="px-6 py-3">Akurasi / NDVI</th>
-                            <th class="px-6 py-3">Status</th>
+                            <th class="px-6 py-3">Model</th>
                             <th class="px-6 py-3 text-center">Aksi</th>
                         </tr>
                     </thead>
@@ -200,8 +200,8 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold {{ $item->followup_status === 'done' ? 'bg-green-100 text-green-700' : ($item->followup_status === 'in_progress' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700') }}">
-                                        {{ $item->followup_status ?? 'pending' }}
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700">
+                                        {{ $item->model_used ?? data_get($item->raw_payload, 'diagnosis.model_used') ?? data_get($item->raw_payload, 'diagnosis.model') ?? '-' }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-center">
@@ -294,10 +294,10 @@
                             </div>
 
                             <div>
-                                <p class="text-xs text-gray-500 font-semibold">NDVI / Status</p>
+                                <p class="text-xs text-gray-500 font-semibold">NDVI / Model</p>
                                 <p class="text-sm font-medium text-gray-800">
                                     {{ $item->ndvi_value !== null ? number_format((float) $item->ndvi_value, 5) : '-' }}
-                                    · {{ $item->followup_status ?? 'pending' }}
+                                    · {{ $item->model_used ?? data_get($item->raw_payload, 'diagnosis.model_used') ?? data_get($item->raw_payload, 'diagnosis.model') ?? '-' }}
                                 </p>
                             </div>
 

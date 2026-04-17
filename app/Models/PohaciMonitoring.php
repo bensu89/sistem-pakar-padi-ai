@@ -21,6 +21,7 @@ class PohaciMonitoring extends Model
         'disease_name',
         'confidence',
         'solution',
+        'model_used',
         'ndvi_value',
         'satellite_source',
         'analysis_mode',

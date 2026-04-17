@@ -133,6 +133,7 @@ class AdminController extends Controller
                 'Sumber Koordinat' => $item->coordinate_source ?? '-',
                 'Hasil Diagnosa' => $item->disease_name ?? '-',
                 'Akurasi (%)' => $item->confidence,
+                'Model AI' => $item->model_used ?? data_get($item->raw_payload, 'diagnosis.model_used') ?? data_get($item->raw_payload, 'diagnosis.model') ?? '-',
                 'NDVI' => $item->ndvi_value,
                 'Mode Analisa' => $item->analysis_mode,
                 'Rekomendasi' => $item->recommendation ?? $item->solution,
@@ -146,7 +147,7 @@ class AdminController extends Controller
             new class implements FromCollection, WithHeadings {
                 public function headings(): array
                 {
-                    return ['No', 'Petani / Akun', 'Waktu Laporan', 'Lokasi', 'Sumber Koordinat', 'Hasil Diagnosa', 'Akurasi (%)', 'NDVI', 'Mode Analisa', 'Rekomendasi', 'Status Tindak Lanjut', 'Lokasi Gambar'];
+                    return ['No', 'Petani / Akun', 'Waktu Laporan', 'Lokasi', 'Sumber Koordinat', 'Hasil Diagnosa', 'Akurasi (%)', 'Model AI', 'NDVI', 'Mode Analisa', 'Rekomendasi', 'Status Tindak Lanjut', 'Lokasi Gambar'];
                 }
 
                 public function collection()
@@ -160,6 +161,7 @@ class AdminController extends Controller
                             'Sumber Koordinat' => $item->coordinate_source ?? '-',
                             'Hasil Diagnosa' => $item->disease_name ?? '-',
                             'Akurasi (%)' => $item->confidence,
+                            'Model AI' => $item->model_used ?? data_get($item->raw_payload, 'diagnosis.model_used') ?? data_get($item->raw_payload, 'diagnosis.model') ?? '-',
                             'NDVI' => $item->ndvi_value,
                             'Mode Analisa' => $item->analysis_mode,
                             'Rekomendasi' => $item->recommendation ?? $item->solution,

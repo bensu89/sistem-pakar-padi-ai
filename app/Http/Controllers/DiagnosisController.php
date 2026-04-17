@@ -106,6 +106,7 @@ class DiagnosisController extends Controller
                 'disease_name' => $diagnosis->disease_name,
                 'confidence' => $diagnosis->confidence,
                 'solution' => $diagnosis->solution,
+                'model_used' => $result['model_used'] ?? null,
                 'ndvi_value' => $ndviValue,
                 'satellite_source' => $satelliteSource,
                 'analysis_mode' => $analysisMode,
@@ -119,6 +120,7 @@ class DiagnosisController extends Controller
             ]);
 
             return response()->json(array_merge($result, [
+                'model_used' => $result['model_used'] ?? null,
                 'ndvi_value' => $ndviValue,
                 'satellite_source' => $satelliteSource,
                 'analysis_mode' => $analysisMode,
