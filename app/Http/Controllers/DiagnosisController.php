@@ -8,6 +8,7 @@ use App\Models\Diagnosis;
 use App\Models\FailedUpload;
 use App\Models\PohaciMonitoring;
 use App\Services\GroqService;
+use Illuminate\Support\Facades\Schema;
 use Symfony\Component\Process\Process;
 
 class DiagnosisController extends Controller
@@ -94,7 +95,7 @@ class DiagnosisController extends Controller
             $coordinates = $this->resolveCoordinates($request, $image);
             $user = auth()->user();
 
-            PohaciMonitoring::create([
+            $monitoringData = [
                 'user_id' => $user?->id,
                 'reporter_name' => $user?->name ?? 'Pengguna Umum',
                 'reporter_email' => $user?->email ?? null,
@@ -106,7 +107,6 @@ class DiagnosisController extends Controller
                 'disease_name' => $diagnosis->disease_name,
                 'confidence' => $diagnosis->confidence,
                 'solution' => $diagnosis->solution,
-                'model_used' => $result['model_used'] ?? null,
                 'ndvi_value' => $ndviValue,
                 'satellite_source' => $satelliteSource,
                 'analysis_mode' => $analysisMode,
@@ -117,7 +117,13 @@ class DiagnosisController extends Controller
                     'coordinates' => $coordinates,
                     'spatial' => $spatialPayload,
                 ],
-            ]);
+            ];
+
+            if (Schema::hasColumn('pohaci_monitorings', 'model_used')) {
+                $monitoringData['model_used'] = $result['model_used'] ?? null;
+            }
+
+            PohaciMonitoring::create($monitoringData);
 
             return response()->json(array_merge($result, [
                 'model_used' => $result['model_used'] ?? null,

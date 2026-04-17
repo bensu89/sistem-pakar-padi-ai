@@ -142,6 +142,7 @@ class ChatController extends Controller
             'status' => 'active',
             'metadata' => [
                 'created_from' => 'chat',
+                'guest_session_id' => session()->getId(),
             ],
         ]);
     }
@@ -151,7 +152,7 @@ class ChatController extends Controller
         return DB::transaction(function () use ($conversation, $senderType, $content, $hasAttachment, $metadata) {
             return PohaciMessage::create([
                 'conversation_id' => $conversation->id,
-                'user_id' => auth()->id(),
+                'user_id' => $conversation->user_id,
                 'sender_type' => $senderType,
                 'content' => $content,
                 'has_attachment' => $hasAttachment,

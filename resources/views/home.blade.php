@@ -110,10 +110,13 @@
                         <i class="fa-solid fa-gauge-high"></i> Dashboard
                     </a>
                 @else
-                    <a href="{{ route('login') }}"
-                        class="bg-white/80 backdrop-blur text-gray-500 hover:text-blue-600 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition hover:bg-white hover:shadow-sm border border-transparent hover:border-blue-100">
-                        <i class="fa-solid fa-lock"></i> Admin Login
-                    </a>
+                    <div class="text-right">
+                        <p class="text-[11px] font-semibold text-green-600">Akses publik</p>
+                        <a href="{{ route('login') }}"
+                            class="bg-white/80 backdrop-blur text-gray-500 hover:text-blue-600 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition hover:bg-white hover:shadow-sm border border-transparent hover:border-blue-100 mt-1">
+                            <i class="fa-solid fa-lock"></i> Admin Login
+                        </a>
+                    </div>
                 @endauth
             </div>
 
@@ -121,8 +124,7 @@
                 <div class="bg-gradient-to-br from-green-50 via-white to-emerald-50 rounded-2xl border border-green-100 p-4 shadow-sm">
                     <p class="text-xs uppercase tracking-[0.2em] text-green-600 font-semibold">Diagnosa Foto</p>
                     <h2 class="text-lg font-bold text-gray-800 mt-1">Ambil / Upload Foto langsung dari chat</h2>
-                    <p class="text-sm text-gray-500">Pilih dari kamera atau galeri, lalu cek penyakitnya di sini.</p>
-
+                    <p class="text-sm text-gray-500">Pilih dari kamera atau galeri, lalu cek kesehatan padi.</p>
                     <form id="uploadForm" class="space-y-3 mt-4">
                         <label for="imageInput"
                             class="border-2 border-dashed border-green-300 rounded-2xl bg-white/90 hover:bg-green-50 transition cursor-pointer relative min-h-[12rem] flex flex-col justify-center items-center group overflow-hidden shadow-inner">
@@ -329,6 +331,7 @@
         let attachedFile = null;
         let attachedUrl = null;
         let browserLocation = null;
+        let selectedDiagnosisFile = null;
         let currentConversationId = localStorage.getItem(CHAT_CONVERSATION_KEY) || '';
         const mobileSidebar = document.getElementById('mobileSidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
@@ -608,6 +611,7 @@
                 document.getElementById('imagePreview').src = "";
                 document.getElementById('previewContainer').classList.add('hidden');
                 document.getElementById('uploadPrompt').classList.remove('hidden');
+                selectedDiagnosisFile = null;
                 sessionStorage.removeItem(DIAGNOSIS_SESSION_KEY);
                 resetDiagnosisUI();
                 currentDisease = "Konsultasi Umum";
@@ -639,6 +643,7 @@
         function handleDiagnosisImageSelection(file) {
             if (!file) return;
 
+            selectedDiagnosisFile = file;
             document.getElementById('imageInputCamera').value = '';
             document.getElementById('imageInputGallery').value = '';
 
@@ -676,11 +681,8 @@
         // ============================================================
         document.getElementById('uploadForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-            const fileInput = document.getElementById('imageInputGallery').files[0]
-                ? document.getElementById('imageInputGallery')
-                : document.getElementById('imageInputCamera');
 
-            if (!fileInput.files[0]) {
+            if (!selectedDiagnosisFile) {
                 showToast('warning', 'Pilih foto dulu!');
                 return;
             }
@@ -691,7 +693,7 @@
             btn.disabled = true;
 
             const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
+            formData.append('file', selectedDiagnosisFile);
             if (browserLocation) {
                 formData.append('latitude', browserLocation.latitude);
                 formData.append('longitude', browserLocation.longitude);
