@@ -4,18 +4,20 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\PohaciMonitoring;
-use App\Models\FailedUpload;   // Model Data Sampah
+use App\Models\FailedUpload;
+use App\Services\SupabaseStorageService;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
 
 class AdminController extends Controller
 {
-    // Lindungi semua method dengan auth middleware
-    public function __construct()
+    protected SupabaseStorageService $supabase;
+
+    public function __construct(SupabaseStorageService $supabase)
     {
         $this->middleware('auth');
+        $this->supabase = $supabase;
     }
 
     // 1. HALAMAN UTAMA DASHBOARD
@@ -109,10 +111,7 @@ class AdminController extends Controller
     {
         $item = PohaciMonitoring::find($id);
         if ($item) {
-            // Hapus file fisik gambar agar hemat penyimpanan
-            if ($item->image_path && file_exists(public_path($item->image_path))) {
-                unlink(public_path($item->image_path));
-            }
+            $this->deleteImage($item->image_path);
             $item->delete();
         }
         return back()->with('success', 'Data monitoring berhasil dihapus');
@@ -123,26 +122,6 @@ class AdminController extends Controller
     {
         $fileName = 'Laporan_Pohaci_Monitoring_' . date('Y-m-d_H-i') . '.xlsx';
 
-        // Get all monitoring data
-        $data = PohaciMonitoring::latest()->get()->map(function($item, $index) {
-            return [
-                'No' => $index + 1,
-                'Petani / Akun' => $item->reporter_name ?? '-',
-                'Waktu Laporan' => $item->created_at->format('d-m-Y H:i'),
-                'Lokasi' => trim(($item->latitude ?? '-') . ', ' . ($item->longitude ?? '-')),
-                'Sumber Koordinat' => $item->coordinate_source ?? '-',
-                'Hasil Diagnosa' => $item->disease_name ?? '-',
-                'Akurasi (%)' => $item->confidence,
-                'Model AI' => $item->model_used ?? data_get($item->raw_payload, 'diagnosis.model_used') ?? data_get($item->raw_payload, 'diagnosis.model') ?? '-',
-                'NDVI' => $item->ndvi_value,
-                'Mode Analisa' => $item->analysis_mode,
-                'Rekomendasi' => $item->recommendation ?? $item->solution,
-                'Status Tindak Lanjut' => $item->followup_status ?? '-',
-                'Lokasi Gambar' => $item->image_path ? asset($item->image_path) : '-'
-            ];
-        });
-
-        // Create Excel collection
         return Excel::download(
             new class implements FromCollection, WithHeadings {
                 public function headings(): array
@@ -152,7 +131,7 @@ class AdminController extends Controller
 
                 public function collection()
                 {
-                    $data = PohaciMonitoring::latest()->get()->map(function($item, $index) {
+                    return PohaciMonitoring::latest()->get()->map(function ($item, $index) {
                         return [
                             'No' => $index + 1,
                             'Petani / Akun' => $item->reporter_name ?? '-',
@@ -166,10 +145,9 @@ class AdminController extends Controller
                             'Mode Analisa' => $item->analysis_mode,
                             'Rekomendasi' => $item->recommendation ?? $item->solution,
                             'Status Tindak Lanjut' => $item->followup_status ?? '-',
-                            'Lokasi Gambar' => $item->image_path ? asset($item->image_path) : '-'
+                            'Lokasi Gambar' => $item->image_path ? asset($item->image_path) : '-',
                         ];
                     });
-                    return collect($data);
                 }
             },
             $fileName
@@ -181,16 +159,23 @@ class AdminController extends Controller
         $item = FailedUpload::find($id);
 
         if ($item) {
-            // Hapus file gambarnya juga biar storage lega
-            // Cek path, kadang tersimpan relative atau full path
-            // Kita coba public_path() standar
-            if (file_exists(public_path($item->image_path))) {
-                unlink(public_path($item->image_path));
-            }
-
+            $this->deleteImage($item->image_path);
             $item->delete();
         }
 
         return back()->with('success', 'Data sampah berhasil dihapus permanen.');
+    }
+
+    protected function deleteImage(?string $imagePath): void
+    {
+        if (!$imagePath) {
+            return;
+        }
+
+        if ($this->supabase->isSupabaseUrl($imagePath)) {
+            $this->supabase->delete($imagePath);
+        } elseif (file_exists(public_path($imagePath))) {
+            unlink(public_path($imagePath));
+        }
     }
 }

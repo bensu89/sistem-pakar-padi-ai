@@ -67,7 +67,7 @@ class ChatController extends Controller
                     'message_id' => $userMessage->id,
                     'ai_message_id' => $aiMessage->id,
                     'answer' => $answer,
-                    'model_used' => 'meta-llama/llama-4-scout-17b-16e-instruct',
+                    'model_used' => config('services.groq.vision_model'),
                     'type' => $messageType,
                 ]);
             }

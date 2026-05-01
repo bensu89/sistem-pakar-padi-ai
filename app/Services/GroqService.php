@@ -297,11 +297,9 @@ Aturan:
     protected function sendRequest(array $messages, string $model): string
     {
         $maxRetries = 3;
-        $attempt = 0;
         $backoff = 2; // Detik awal
 
-        do {
-            $attempt++;
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
             try {
                 $http = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $this->apiKey,
@@ -324,12 +322,12 @@ Aturan:
                     return $data['choices'][0]['message']['content'] ?? '⚠️ Respons kosong dari AI.';
                 }
 
-                // Handle 429 Specifically
+                // Handle 429 with exponential backoff
                 if ($response->status() === 429) {
                     Log::warning("Groq Rate Limit (429). Retrying attempt {$attempt}/{$maxRetries}...");
                     if ($attempt < $maxRetries) {
                         sleep($backoff);
-                        $backoff *= 2; // Exponential backoff (2s, 4s, 8s)
+                        $backoff *= 2; // Exponential backoff (2s, 4s)
                         continue;
                     }
                     return '⚠️ Terlalu banyak permintaan (Rate Limit). Silakan tunggu beberapa saat lagi.';
@@ -342,7 +340,7 @@ Aturan:
                 Log::error('Groq API Exception: ' . $e->getMessage());
                 return '⚠️ Koneksi ke AI gagal: ' . $e->getMessage();
             }
-        } while ($attempt < $maxRetries);
+        }
 
         return '⚠️ Gagal menghubungi AI setelah beberapa percobaan.';
     }
