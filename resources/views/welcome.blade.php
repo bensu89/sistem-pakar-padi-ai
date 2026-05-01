@@ -379,7 +379,7 @@
                     <i class="fa-solid fa-leaf text-green-500"></i>
                     <span class="font-bold text-xl">Pohaci AI</span>
                 </div>
-                <p class="text-gray-400 text-sm">KKN Desa Cikurubuk 2026</p>
+
             </div>
 
             <div class="flex gap-6">
